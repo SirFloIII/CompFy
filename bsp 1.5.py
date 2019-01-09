@@ -15,9 +15,9 @@ import arrow
 stock = "MCD"
 
 
-#get time from now and exactly one year in the past
+#get time from now and exactly two years in the past
 end = arrow.utcnow()
-start = end.shift(years = -5).date()
+start = end.shift(years = -2).date()
 end = end.date()
 
 panel_data = data.DataReader(stock, "yahoo", start, end)
