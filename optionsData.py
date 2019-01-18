@@ -7,6 +7,10 @@ Created on Wed Jan 16 01:04:35 2019
 
 import numpy as np
 from datetime import datetime
+import requests
+import json
+from time import time
+
 
 def timediff(a, b):
     date_format = "%m/%d/%y"
@@ -44,6 +48,68 @@ def convertFileToKTPMatrix(filename = "options-screener-01-16-2019.csv", day = "
     
     return np.array(CallOptions, dtype = np.float)
 
+def getOptionDataFromYahoo(symbol, optiontype = "Call"):
+    page = requests.get("https://query1.finance.yahoo.com/v7/finance/options/"+symbol)
+    
+    content = json.loads(page.text)
+    
+    if optiontype == "Call":
+        options = content["optionChain"]["result"][0]["options"][0]["calls"]
+    elif optiontype == "Put":
+        options = content["optionChain"]["result"][0]["options"][0]["puts"]
+    else:
+        assert optiontype == "Call" or optiontype == "Put"
+        
+    K = [option["strike"] for option in options]
+    
+    now = time()
+    T = [(option["expiration"] - now)/60/60/24 for option in options]
+    
+    P = [(option["ask"]+option["bid"])/2 for option in options]
+    
+    KTP = np.array((K,T,P)).T
+    
+    return KTP
+
 if __name__ == "__main__":
     
-    C = convertFileToKTPMatrix()
+    symbols = ["KO", "PEP", "IBM", "INTC", "NVDA", "GOOG", "AAPL"]
+    optiontype = "Call"
+    
+    KTP = [getOptionDataFromYahoo(symbol, optiontype = optiontype) for symbol in symbols]
+    
+    #C = convertFileToKTPMatrix()
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
