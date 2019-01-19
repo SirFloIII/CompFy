@@ -48,11 +48,21 @@ def phi(theta,u,t,S0,mu):
     b=2*theta[3]*theta[1]/(theta[4]**2)*DD(theta,u,t)
     return cm.exp(a+b)
 
+def phi2(theta,u,t,S0,mu):
+    a=1j*u*(cm.log(S0)+mu*t)
+    #r=mu????
+    b=theta[3]*theta[1]/(theta[4]**2)*((xi(theta,u)-de(theta,u))*t-2*cm.log((1-g2(theta,u)*cm.exp(-de(theta,u)*t))/(1-g2(theta,u))))
+    c=theta[0]/(theta[4]**2)*(xi(theta,u)-de(theta,u))*(1-cm.exp(-de(theta,u)*t))/(1-g2(theta,u)*cm.exp(-de(theta,u)*t))
+    return cm.exp(a+b+c)
+
+
+
+
 """def DD(theta,u,t):
     return cm.log(BB(theta,u,t))"""
 
 def DD(theta,u,t):
-    return cm.log(de(theta,u))+(theta[3]-de(theta,u))*t/2-cm.log((de(theta,u)+xi(theta,u))/2+(de(theta,u)-xi(theta,u))*cm.exp(-de(theta,u)*t))
+    return cm.log(de(theta,u))+(theta[3]-de(theta,u))*t/2-cm.log((de(theta,u)+xi(theta,u))/2+(de(theta,u)-xi(theta,u))/2*cm.exp(-de(theta,u)*t))
 
 def dddrho(theta,u):
     return -xi(theta,u)*theta[4]*1j*u/de(theta,u)
@@ -92,7 +102,7 @@ def h1(theta,u,t):
     return -AA(theta,u,t)
 
 def h2(theta,u,t):
-    return 2*theta[3]/(theta[4]**2)*de(theta,u)-t*theta[3]*theta[2]*1j*u/theta[4]
+    return 2*theta[3]/(theta[4]**2)*DD(theta,u,t)-t*theta[3]*theta[2]*1j*u/theta[4]
 
 def h3(theta,u,t):
     return -theta[0]*dAdrho(theta,u,t)+2*theta[3]*theta[1]/((theta[4]**2)*de(theta,u))*(dddrho(theta,u)-de(theta,u)/A2(theta,u,t)*dA2drho(theta,u,t))-t*theta[3]*theta[1]*1j*u/theta[4]
@@ -136,6 +146,9 @@ def dphiint1(theta,t,S0,mu,K,N,Nmax):
     
     return np.array(erg).real
 
+
+
+
 #Unterschied der Beiden: einmal hat man phi(u-i) und einmal phi(u)
 
 def dphiint2(theta,t,S0,mu,K,N,Nmax):
@@ -158,9 +171,39 @@ def dphiint2(theta,t,S0,mu,K,N,Nmax):
         for k in range(1,N):
         #Trapezregel
         #ein bissl aufpassen bei der 0
-            erg[i]=erg[i]+K**(-1j*uu(k,N,Nmax))/(1j*uu(k,N,Nmax))*phi(theta,uu(k,N,Nmax),t,S0,mu)*h[i][k]*(uu(N,N,Nmax)/N)
+            erg[i]=erg[i]+K**(-1j*uu(k,N,Nmax))/(1j*uu(k,N,Nmax))*phi(theta,uu(k,N,Nmax),t,S0,mu)*h[i][k]*(uu(N,N,Nmax)-uu(1,N,Nmax))/N
     
     return np.array(erg).real
+
+
+"""def dphiint3(theta,t,S0,mu,K,N,Nmax):
+    #dient nur zu Testzwecken
+    h=[[0],[0],[0],[0],[0]]
+    
+        
+    for k in range(1,N):
+        h[0].append(h1(theta,uu(k,N,Nmax),t))
+        h[1].append(h2(theta,uu(k,N,Nmax),t))
+        h[2].append(h3(theta,uu(k,N,Nmax),t))
+        h[3].append(h4(theta,uu(k,N,Nmax),t))
+        h[4].append(h5(theta,uu(k,N,Nmax),t))
+   
+    
+    erg=[0]
+    #ist Anfangswert der numerischen Integralberechnung, könnte man sich ausrechnen, ist aber mühsam, deshalb weggelassen
+    i=0
+    for k in range(1,N):
+        #Trapezregel
+        #ein bissl aufpassen bei der 0
+        erg[i]=erg[i]+K**(-1j*uu(k,N,Nmax))/(1j*uu(k,N,Nmax))*phi(theta,uu(k,N,Nmax),t,S0,mu)*h[4][k]*(uu(N,N,Nmax)-uu(1,N,Nmax))/N
+    
+    return np.array(erg).real"""
+
+
+
+
+
+
 
 
 def gradC(theta,t,S0,mu,K,N=8593,Nmax=100):
@@ -211,12 +254,15 @@ def JJ(theta,S0,mu,data,N=8593,Nmax=100):
     J=[]
     for i in range(len(data)):
         J.append(gradC(theta,data[i][1],S0,mu,data[i][0],N,Nmax))
-    return np.tanspose(J)
+    
+    J=np.array(J)
+    J=np.transpose(J)
+    return J
 
 def LevMarquCali(theta,S0,mu,data,N=8593,Nmax=100):
-    eps1=0.001
-    eps2=0.001
-    eps3=0.001
+    eps1=5
+    eps2=2
+    eps3=0.0001
     #r=r(theta_k)
     #rnew=r(theta_{k+1})
     #genauso thetanew
@@ -227,17 +273,19 @@ def LevMarquCali(theta,S0,mu,data,N=8593,Nmax=100):
     v=2
     tau=0.2
     J=JJ(theta,S0,mu,data,N,Nmax)
-    damp=tau*np.max(np.diag(J))
-    
+    #damp=tau*np.max(np.diag(J))
+    damp=1
     if damp<=0:
         print("Es gibt wahrscheinlich ein Problem mit mu0")
     
-    for k in range(10000):
+    for k in range(20):
+        print(theta)
         df=np.dot(J,r)
         A=np.linalg.inv(J@np.transpose(J)+damp*np.eye(5))
         deltathet=np.dot(A,df)
         
-        thetanew=theta+deltathet
+        thetanew=theta+0.1*deltathet
+        #ich hab hier den Faktor 0.1 dazugegeben, der hat Wunder bewirkt
         rnew=rr(thetanew,S0,mu,data,N,Nmax)
         
         a=np.transpose(deltathet)
@@ -247,20 +295,37 @@ def LevMarquCali(theta,S0,mu,data,N=8593,Nmax=100):
         
         deltaF=np.linalg.norm(r)-np.linalg.norm(rnew)
         
-        if deltaL>0 and deltaF>0:
-            Jnew=JJ(thetanew,S0,mu,data,N,Nmax)
+        #print("deltaL=",deltaL,"  deltaF=",deltaF)
+        
+        if deltaL>0:
+             #and deltaF>0
+            if (k%3==0) or deltaF>0:
+                Jnew=JJ(thetanew,S0,mu,data,N,Nmax)
+                J=Jnew
+                print("Jnew")
+            else:
+                damp=damp*v
+                v=2*v
         else:
             damp=damp*v
             v=2*v
             
-        if np.norm(r)<eps1 or max(abs(np.dot(J,[1]*len(J[1]))))<eps2 or np.linalg.norm(deltathet)/np.linalg.norm(theta)<eps3:
-            return theta
+        if np.linalg.norm(r)<eps1:
+            print("Cond1")
+            return [theta,r]
         
-        J=Jnew
+        if max(abs(np.dot(J,[1]*len(J[1]))))<eps2:
+            print("Cond2")
+            return [theta,r]
+        
+        if np.linalg.norm(deltathet)/np.linalg.norm(theta)<eps3:
+            print("Cond3")
+            return [theta,r]
+        
         theta=thetanew
         r=rnew
         
-    return 0
+    return [theta,r]
 
 
 
@@ -268,9 +333,11 @@ def LevMarquCali(theta,S0,mu,data,N=8593,Nmax=100):
 
 theta=[0.08,0.1,-0.8,3,0.25]
 
-S0=1
-K=1.1
-mu=0.02
+
+S0=110
+mu=0.01
+N=70
+Nmax=5
 
 
 
