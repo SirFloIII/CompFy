@@ -297,7 +297,7 @@ def LevMarquCali(theta,S0,mu,data,N=8593,Nmax=100):
         
         #print("deltaL=",deltaL,"  deltaF=",deltaF)
         
-        if deltaL>0:
+        if deltaL>0 and deltaF>0:
              #and deltaF>0
             if (k%3==0) or deltaF>0:
                 Jnew=JJ(thetanew,S0,mu,data,N,Nmax)
@@ -331,7 +331,7 @@ def LevMarquCali(theta,S0,mu,data,N=8593,Nmax=100):
 
 
 
-theta=[0.08,0.1,-0.8,3,0.25]
+theta=[0.08,0.1,-0.7,3,0.25]
 
 
 S0=110
