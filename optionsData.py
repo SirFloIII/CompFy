@@ -50,27 +50,42 @@ def convertFileToKTPMatrix(filename = "options-screener-01-16-2019.csv", day = "
 
 def getOptionDataFromYahoo(symbol, optiontype = "Call"):
     page = requests.get("https://query1.finance.yahoo.com/v7/finance/options/"+symbol)
-    
     content = json.loads(page.text)
     
-    if optiontype == "Call":
-        options = content["optionChain"]["result"][0]["options"][0]["calls"]
-    elif optiontype == "Put":
-        options = content["optionChain"]["result"][0]["options"][0]["puts"]
-    else:
-        assert optiontype == "Call" or optiontype == "Put"
+    K = []
+    T = []
+    P = []
+    
+    for exp in content["optionChain"]["result"][0]["expirationDates"]:
+        page = requests.get("https://query1.finance.yahoo.com/v7/finance/options/"+symbol+"?date="+str(exp))
+        content = json.loads(page.text)
         
-    K = [option["strike"] for option in options]
-    
-    now = time()
-    T = [(option["expiration"] - now)/60/60/24 for option in options]
-    
-    P = [(option["ask"]+option["bid"])/2 for option in options]
-    
+        if optiontype == "Call":
+            options = content["optionChain"]["result"][0]["options"][0]["calls"]
+        elif optiontype == "Put":
+            options = content["optionChain"]["result"][0]["options"][0]["puts"]
+        else:
+            assert optiontype == "Call" or optiontype == "Put"
+            
+        K += [option["strike"] for option in options]
+        
+        now = time()
+        T += [(option["expiration"] - now)/60/60/24/356 for option in options]
+        
+        P += [(option["ask"]+option["bid"])/2 for option in options]
+        
     KTP = np.array((K,T,P)).T
     
     return KTP
 
+def getCurrentPrice(symbol):
+    page = requests.get("https://query1.finance.yahoo.com/v7/finance/options/"+symbol)
+    content = json.loads(page.text)
+    
+    quote = content["optionChain"]["result"][0]["quote"]
+    
+    return quote["regularMarketPrice"]
+    
 if __name__ == "__main__":
     
     symbols = ["KO", "PEP", "IBM", "INTC", "NVDA", "GOOG", "AAPL"]

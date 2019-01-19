@@ -260,6 +260,18 @@ def JJ(theta,S0,mu,data,N=8593,Nmax=100):
     return J
 
 def LevMarquCali(theta,S0,mu,data,N=8593,Nmax=100):
+    """
+    input:
+    theta = (v0,vbar,rho,kap,sigm) = startwert fürs gradientenverfahren
+    S0 = jetztige wert des Stocks
+    mu = risikoloser Zinssatz
+    data = KTP Matrix
+    N = die anzahl der stützstellen
+    Nmax = wie weit wir integrieren
+    
+    returns:
+    theta 
+    """
     eps1=5
     eps2=2
     eps3=0.0001

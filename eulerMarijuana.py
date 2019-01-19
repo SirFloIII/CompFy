@@ -16,8 +16,7 @@ vp0 = 10
 vc0 = 10
 
 #konstanten
-müp = 1
-müc = 1
+mü = 0.01
 vqp = 10
 vqc = 11
 sigmap = 3
@@ -54,8 +53,8 @@ vp, _ = compfy.EulerSDE(avp, bvp, vp0, T=T, N=N, dW = dW[1], mode = "absolute")
 vc, _ = compfy.EulerSDE(avc, bvc, vc0, T=T, N=N, dW = dW[3], mode = "absolute")
 
 #defing a and b for the stocks themself
-aPEP = lambda t, S : müp * S
-aKO = lambda t, S : müc * S
+aPEP = lambda t, S : mü * S
+aKO = lambda t, S : mü * S
 
 i = lambda t : int(t/h)
 bPEP = lambda t, S : np.sqrt(vp[i(t)])
@@ -65,44 +64,7 @@ PEP, _ = compfy.EulerSDE(aPEP, bPEP, PEP0, T=T, N=N, dW = dW[0])
 KO, _ = compfy.EulerSDE(aKO, bKO, KO0, T=T, N=N, dW = dW[2])
 
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
