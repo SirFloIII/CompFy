@@ -47,7 +47,7 @@ for _ in tqdm(range(m)):
     
     #for S
     a2 = lambda t, S : r * S
-    b2 = lambda t, S : np.sqrt(U[int(t*N)] * S)
+    b2 = lambda t, S : np.sqrt(U[int(t/T*(N-1))] * S)
     
     S, _ = compfy.EulerSDE(a2, b2, S0, T = T, N = N, dW = dW2)
     
