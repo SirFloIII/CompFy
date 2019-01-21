@@ -22,7 +22,7 @@ Callpreis<-function(theta,S0,mu,K,t){
 theta=c(0.2,0.2,-0.7,3,0.3)
 theta2=c(0.1,0.1,-0.8,4,0.2)
 
-daten=read.csv("Pepsi.csv",header = FALSE,dec = ",",sep=";")
+
 
 GradCall<-function(theta,S0,mu,K,t,eps){
   erg=array(0,5)
@@ -187,5 +187,84 @@ GradVerfahren2<-function(theta,S0,mu,daten){
   
   
 }
+
+
+
+GradVerfahren3<-function(theta,S0,mu,daten){
+  eps=0.0001
+  #grad=GradCall(theta,S0,mu,K,t,eps)
+  alph=0.1
+  tol1=0.00001
+  tol2=0.0001
+  tol3=0.00001
+  
+  minerror=10000
+  mintheta<-0
+  for(i in 1:1000){
+    grad=Graddat(theta,S0,mu,eps,daten)
+    olderror=sqrt(sum((Resi(theta,S0,mu,daten))^2))
+    #grad=grad/sqrt(sum(grad^2))
+    #grad=grad/abs(grad)
+    grad[2]=grad[2]/sqrt(sum(grad^2))
+    grad=grad/sqrt(sum(grad^2))
+    thetanew=theta-alph*grad
+    
+    thetmin=c(0.03,0.03,-0.9,0.4,0.03)
+    thetmax=c(0.95,0.95,-0.05,7,0.95)
+    thetanew=pmax(thetanew,thetmin)
+    thetanew=pmin(thetanew,thetmax)
+    
+    "if(thetanew[3]<-1){
+    thetanew[3]=-0.9
+  }"
+    #print(thetanew)
+    newerror=sqrt(sum((Resi(thetanew,S0,mu,daten))^2))
+    
+    
+    if(newerror<minerror){
+      minerror<-newerror
+      mintheta<-thetanew
+      cat("NeFehl=",newerror,"theta=",thetanew,"\n")
+    }
+    
+    if(newerror<olderror){
+      alph=1
+      theta=thetanew
+    }
+    
+    if(newerror>olderror){
+      alph=alph*0.7
+    }
+    
+    if(sqrt(sum(grad^2))<tol1){
+      print("Bed 1")
+      return(theta)
+    }
+    if(newerror<tol2){
+      print("Bed2")
+      print(olderror)
+      print(newerror)
+      return(theta)
+    }
+    if(thetanew[3]<(-1)){
+      print("Fuck you")
+      return(mintheta)
+    }
+    
+    
+}
+  return(mintheta)
+  
+  
+}
+
+Pepsi=read.csv("Pepsi.csv",header = FALSE,dec = ".",sep=";")
+Cola=read.csv("Cola.csv",header=FALSE,dec=".",sep=";")
+
+mu=0.005
+
+
+
+
 
   #  GradVerfahren(theta,110,0.01,daten)
