@@ -34,8 +34,8 @@ class stock:
         
         table = data.DataReader(symbol, "yahoo", start, end)
         self.history = (np.array(table["Open"])+np.array(table["Close"]))/2
-        self.V = None
-        self.S = None
+        self.V = []
+        self.S = []
         
     def aV(self, t, v):
         return self.kap*(self.vq - v)
@@ -48,9 +48,14 @@ class stock:
     
     def bS(self, t, s):
         return np.sqrt(self.V[it(t)]) * s
+    
+    def adjustedEndValues(self):
+        return [s[-1] * self.cooef for s in self.S]
         
 def CallOnMax(stocks):
-    return max(max([s.coeff * s.S[-1] for s in stocks]), 0)
+    #return max(max([s.coeff * s.S[-1] for s in stocks]), 0)
+    return np.average([max(max(ev), 0) for ev in zip([s.adjustedEndValues() for s in stocks])])
+
 
 def CallOnMin(stocks):
     return max(min([s.coeff * s.S[-1] for s in stocks]), 0)
@@ -61,11 +66,9 @@ def Exchange(stocks):
 def Call(stocks, K):
     return max(stocks[0].S[-1] - K, 0)
 
-"""
 n = 5
 symbols = ["IBM", "INTC", "NVDA", "GOOG", "AAPL"]
 coeffs = [9, 22.5, 7.3, 1, 6.4]
-"""
 
 """
 n = 2
@@ -73,9 +76,11 @@ symbols = ["PEP", "KO"]
 coeffs = [1, 2.3]
 """
 
+"""
 n = 1
 symbols = ["KO"]
 coeffs = [1]
+"""
 
 now = time()
 expdates = ["2019-02-01", "2019-02-15", "2019-06-21"]
@@ -122,17 +127,17 @@ for i in range(n):
 payoff = []
 for i in tqdm(range(M)):
     for s in stocks:
-        s.V, _ = compfy.EulerSDE(s.aV, s.bV, s.v0, T=T, N=N, dW = s.dWV[i], mode = "positive")
-        s.S, _ = compfy.EulerSDE(s.aS, s.bS, s.S0, T=T, N=N, dW = s.dWS[i])
-    payoff.append(Call(stocks, 40))
-    
+        s.V.append(compfy.EulerSDE(s.aV, s.bV, s.v0, T=T, N=N, dW = s.dWV[i], mode = "positive")[0])
+        s.S.append(compfy.EulerSDE(s.aS, s.bS, s.S0, T=T, N=N, dW = s.dWS[i])[0])
+    #payoff.append(Call(stocks, 40))
+"""    
 print(np.average(payoff))
     
 for s in stocks:
     plt.plot(s.S*s.coeff)
+"""
 
-
-
+CallOnMax(stocks)
 
 
 
