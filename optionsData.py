@@ -88,7 +88,8 @@ def getCurrentPrice(symbol):
     
 if __name__ == "__main__":
     
-    symbols = ["KO", "PEP", "IBM", "INTC", "NVDA", "GOOG", "AAPL"]
+    #symbols = ["KO", "PEP", "IBM", "INTC", "NVDA", "GOOG", "AAPL"]
+    symbols = ["XLK"]
     optiontype = "Call"
     
     KTP = [getOptionDataFromYahoo(symbol, optiontype = optiontype) for symbol in symbols]
