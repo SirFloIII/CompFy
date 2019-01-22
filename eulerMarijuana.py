@@ -18,10 +18,12 @@ def simulate(PEP0, KO0, vp0, vc0, mü, vqp, vqc, sigmap, sigmac, Kp, Kc, pp, pc,
                     [p1, p3, 1, pc],
                     [p2, p4, pc, 1]])
     
-    dW = np.random.normal(size = (4,N))
-    dW = np.sqrt(h) * var.dot(dW)
+    #dW = np.random.normal(size = (4,N))
+    #dW = np.sqrt(h) * np.linalg.cholesky(var).dot(dW)
     
-    #defining a and b for the variance
+    dW = np.sqrt(h) * np.random.multivariate_normal(np.zeros(4), var, N).T
+    
+    #defining a and b for the volatiliy
     avp = lambda t, v : Kp*(vqp - v)
     avc = lambda t, v : Kc*(vqc - v)
     
