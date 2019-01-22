@@ -1,8 +1,7 @@
 
 
-
 #theta=(v0,vbar,rho,kap,sigm)
-#setwd("C:/Users/thoma/OneDrive/Unizeug/Compfun")
+#setwd("C:/Uni/Computational Finance/Project Rainbow/CompFy")
 require("NMOF")
 
 
@@ -134,7 +133,7 @@ GradVerfahren2<-function(theta,S0,mu,daten){
   #grad=GradCall(theta,S0,mu,K,t,eps)
   alph=0.7
   tol1=0.001
-  tol2=0.01
+  tol2=0.000001
   tol3=0.001
   
   minerror=10000
@@ -195,7 +194,7 @@ GradVerfahren3<-function(theta,S0,mu,daten){
   #grad=GradCall(theta,S0,mu,K,t,eps)
   alph=0.1
   tol1=0.00001
-  tol2=0.0001
+  tol2=0.0000001
   tol3=0.00001
   
   minerror=10000
@@ -261,10 +260,10 @@ GradVerfahren3<-function(theta,S0,mu,daten){
 Pepsi=read.csv("Pepsi.csv",header = FALSE,dec = ".",sep=";")
 Cola=read.csv("Cola.csv",header=FALSE,dec=".",sep=";")
 
-mu=0.005
+mu=0.001
 
 
-
+thetapeps=GradVerfahren3(c(0.3,0.3,-0.7,1,0.3),110,mu,Pepsi)
 
 
   #  GradVerfahren(theta,110,0.01,daten)

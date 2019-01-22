@@ -1,0 +1,114 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{ dsfont }
+\usepackage{fullpage}
+\usepackage[ngerman]{babel}
+%\AtBeginDocument{\renewcommand{\chaptername}{}}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{chngcntr}
+%\counterwithout{equation}{chapter}
+\usepackage[utf8]{inputenc}
+%\usepackage{graphicx}
+%\usepackage{listings}
+%\usepackage{epstopdf}
+\usepackage{caption}
+%\usepackage{showidx}
+\usepackage{makeidx}
+\usepackage{enumerate}	
+\usepackage{ifthen}
+%\usepackage{ bbold }
+\usepackage{ textcomp }
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{hyperref}
+ 
+\newcommand{\ci}{\perp\!\!\!\perp}
+\newenvironment{Bew}{\textbf{Beweis:}}{  \hfill$\square$ \newline}
+\newcommand{\ExiF}{\text{$\E(\xi | \F)$}}
+\newcommand{\F}{\text{$\mathfrak{F}$}}
+\newcommand{\G}{\mathfrak{G}}
+\newcommand{\E}{\mathds{E}}
+\newcommand{\Prob}{\mathds{P}}
+
+\newcommand{\defi}[1]{\index{#1}
+	\index{Definition!#1}
+	\textit{#1}}
+\newtheorem{Satz}{Satz}	
+\newtheorem{Lemma}[Satz]{Lemma}
+\newtheorem{Bemerkung}[Satz]{Bemerkung}
+\newtheorem{Korrolar}[Satz]{Korollar}
+\newtheorem{Definition}[Satz]{Definition}
+\newtheorem{Fakta}[Satz]{Fakta}
+\newtheorem{Proposition}[Satz]{Proposition}
+\newtheorem{Beispiel}[Satz]{Beispiel}
+\newcommand{\spindex}[1]{\index{0@#1}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\alg}{\mathcal{A}}
+
+\newenvironment{Defi}[2][]{\begin{Definition}
+		\index{#1}
+		\index{Definition!#1}
+		\index{#2}
+		\index{Definition!#2}
+		\rm
+		%#1
+	}{\end{Definition}}
+\newenvironment{Lem}{\begin{Lemma}	\rm }{\end{Lemma}}
+\newenvironment{Bem}{\begin{Bemerkung} \rm}{\end{Bemerkung}}
+\newenvironment{Fak}{\begin{Fakta} \rm}{\end{Fakta}}
+\newenvironment{Kor}{\begin{Korrolar} \rm}{\end{Korrolar}}
+\newenvironment{Sat}{	\begin{Satz} \rm}{ \end{Satz} }
+\newenvironment{Bsp}{\begin{Beispiel} \rm}{\end{Beispiel}}
+%	\begin{Satz}[] \rm}{\end{Satz}}
+\newenvironment{Def}{\begin{Definition}	\rm}{\end{Definition}}
+\newenvironment{Pro}{\begin{Proposition} \rm}{\end{Proposition}}
+\newcommand{\ES}{\mathcal{S}}
+\newcommand{\supp}{\text{supp}}
+\newcommand{\one}[1][]{\mathds{1}_{#1}}
+\newcommand{\mom}{m}
+\newcommand{\mn}[1][]{[m_0,...,m_{2\ifthenelse{\equal{#1}{}}{n}{ #1}}]}
+\newcommand{\mne}[1][]{[m_1,...,m_{2\ifthenelse{\equal{#1}{}}{n}{ #1}+1}]}
+\newcommand{\lnn}[1][]{[\el_0,...,\el_{\ifthenelse{\equal{#1}{}}{2n}{2 #1}}]}
+\newcommand{\lne}[1][]{[\el_1,...,\el_{2\ifthenelse{\equal{#1}{}}{n}{ #1}+1}]}
+\newcommand{\vn}[1][]{[\vau_0,...,\vau_{2\ifthenelse{\equal{#1}{}}{n}{ #1}}]}
+\newcommand{\vne}[1][]{[\vau_1,...,\vau_{2\ifthenelse{\equal{#1}{}}{n}{ #1}+1}]}
+\newcommand{\el}{\lambda}
+\newcommand{\vau}{\nu}
+\newcommand{\deq}{\stackrel{d}=}
+\newcommand{\spann}{\text{span}}
+
+\numberwithin[\arabic]{Satz}{section}
+\setlength{\parskip}{2pt}
+\setlength{\parindent}{0pt}
+\definecolor{Tublau}{HTML}{006699}
+\renewcommand{\labelenumi}{(\roman{enumi})}
+\begin{document}
+	\section*{Rainbow-Options}
+	Autoren: Florian Bogner, Hubert Hackl, Martin Vetter, Thomas Wagenhofer
+		\subsection*{Grundlegendes}
+			Im folgenden werden Rainbow-Options betrachtet. Diese sind im Gegenzug zu konventionellen Optionen nicht notwendigerweise auf nur ein Underlying und einen Strike Preis aufgebaut.
+			\newline
+			Konkret werden diese Optionen betrachtet:
+			\begin{itemize}
+				\item Abgabe einer Pepsi-Aktie für 2.3 Anteile einer Coca Cola Aktie
+				\item Abgabe von 2.3 Anteile einer Coca Cola Aktie für eine Pepsi Aktie
+				\item Dem Kauf des Maximums aus dem Basket zu einem Strikepreis K
+				\item Dem Kauf des Minimums aus dem Basket zu einem Strikepreis K
+				\item Dem Kauf des Maximums aus dem Basket zum 16.5-fachen Kurs von XLK\footnote{Technology Select Sector SPDR Fund, ein Fond bestehend aus einigen IT-Firmen}
+				\item Dem Kauf des Minimums aus dem Basket zum 16.5-fachen Kurs von XLK
+			\end{itemize}
+			Der genannte Basket besteht dabei aus folgenden Aktien: 6.5*Apple, Alphabet Inc., 22.5*Intel, 9*IBM und 7.3*NVIDIA.
+			Die Optionen werden jeweils zu den Expirationdates 1.2.2019, 15.2.2019 und 21.6.2019 bewertet.
+		\subsection*{Vorgehensweise}
+		Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren. Den endgültigen Optionspreis erhalten wir dann mit einer Monte Carlo Simulation.\\
+		Die Anfangsparameter Volatilität $v_0$, mittlere Volatilität $\bar{v}$, Korrelation zwischen Volatilität und Stockprice $\rho$, mean-reversion Parameter $\kappa$ und die Volatilität der Volatilität $\sigma$ ermitteln wir mit einem Gradientenverfahren.\\
+		Schließlich benötigen wir noch die Korrelationen (welche wir als konstant annehmen!) zwischen den Stocks um mit diesen unsere Kovarianzmatrix für die in den Modellen auftretenden Normalverteilungen aufzustellen.
+		Wegen der Identität:
+		\begin{align*}
+			\rho_{1,2}&=Cor(S_t,\tilde{S_t})=\\
+			&=Cor(S_0+\mu S_0h+\sqrt{v_0}S_0\sqrt{h}N_1,\tilde{S_0}+\mu \tilde{S_0}h+\sqrt{v_0}\tilde{S_0}\sqrt{h}N_2)= \\
+			&=Cor(\sqrt{v_0}S_0\sqrt{h}N_1,\sqrt{v_0}\tilde{S_0}\sqrt{h}N_2)=Cor(N_1,N_2)
+		\end{align*}
+		können wir die Korrelationsparameter aus historischen Daten berechnen.
+		\newpage
+\end{document}

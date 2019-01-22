@@ -12,7 +12,7 @@ Cola=op.getOptionDataFromYahoo("KO")
 Pepsi=op.getOptionDataFromYahoo("PEP")
 
 
-numpy.savetxt('Cola1.csv', Cola, fmt='%f', delimiter=';')
+numpy.savetxt('Cola.csv', Cola, fmt='%f', delimiter=';')
 numpy.savetxt('Pepsi.csv',Pepsi,fmt='%f',delimiter=';')
 
 
