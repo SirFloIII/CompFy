@@ -136,6 +136,12 @@ Savethet<-function(theta,mu,name){
   readname2=paste("KTP_",name,".csv",sep="")
   daten=read.csv(readname2,header=FALSE,dec=".",sep=";")
   
+  if(length(daten[,1])>200){
+    vec=sample(1:length(daten[,1]))
+    daten=daten[vec,]
+    daten=daten[1:200,]
+  }
+  
   erg=GradVerfahren3(theta,S0,mu,daten)
   
   datname=paste("theta",name,".csv",sep = "")
