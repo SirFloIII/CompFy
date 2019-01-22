@@ -1,7 +1,8 @@
 
 
+
 #theta=(v0,vbar,rho,kap,sigm)
-#setwd("C:/Uni/Computational Finance/Project Rainbow/CompFy")
+#setwd("C:/Users/Thomas/OneDrive/Unizeug/Compfun/CompFy")
 require("NMOF")
 
 
@@ -14,12 +15,10 @@ Callpreis<-function(theta,S0,mu,K,t){
   rho=theta[3]
   k=theta[4]
   sigma=theta[5]
- erg=callHestoncf(S0,K,t,r,q,v0,vT,rho,k,sigma) 
+  erg=callHestoncf(S0,K,t,r,q,v0,vT,rho,k,sigma) 
   return(erg)
   
 }
-theta=c(0.2,0.2,-0.7,3,0.3)
-theta2=c(0.1,0.1,-0.8,4,0.2)
 
 
 
@@ -53,139 +52,7 @@ Resi<-function(theta,S0,mu,daten){
   return(erg)
 }
 
-GradVerfahren<-function(theta,S0,mu,daten){
-  eps=0.0001
-  #grad=GradCall(theta,S0,mu,K,t,eps)
-  alph=0.1
-  tol1=0.00001
-  tol2=0.00001
-  tol3=0.00001
-  
-  minerror=10000
-  mintheta<-0
-  for(i in 1:1000){
-    grad=Graddat(theta,S0,mu,eps,daten)
-    olderror=sqrt(sum((Resi(theta,S0,mu,daten))^2))
-    #grad=grad/sqrt(sum(grad^2))
-    #grad=grad/abs(grad)
-    grad[2]=grad[2]/sqrt(sum(grad^2))
-    grad=grad/sqrt(sum(grad^2))
-    thetanew=theta-alph*grad
-    
-    if(thetanew[2]<0){
-      thetanew[2]=0.03
-    }
-    
-    if(thetanew[5]<0){
-      thetanew[5]=0.03
-    }
-    
-    if(thetanew[1]>0.6){
-      thetanew[1]=0.6
-    }
-    
-    "if(thetanew[3]<-1){
-      thetanew[3]=-0.9
-    }"
-    
-    newerror=sqrt(sum((Resi(thetanew,S0,mu,daten))^2))
-    
-    
-    if(newerror<minerror){
-      minerror<-newerror
-      mintheta<-thetanew
-      cat("NeFehl=",newerror,"theta=",thetanew,"\n")
-    }
-    
-    if(newerror<olderror){
-      alph=1
-      theta=thetanew
-    }
-    
-    if(newerror>olderror){
-      alph=alph*0.7
-    }
-    
-    if(sqrt(sum(grad^2))<tol1){
-     print("Bed 1")
-       return(theta)
-    }
-    if(newerror<tol2){
-      print("Bed2")
-      print(olderror)
-      print(newerror)
-      return(theta)
-    }
-    if(thetanew[3]<(-1)){
-      print("Fuck you")
-      return(mintheta)
-    }
-    
-    
-  }
-  return(mintheta)
-  
-  
-  }
 
-GradVerfahren2<-function(theta,S0,mu,daten){
-  eps=0.0001
-  #grad=GradCall(theta,S0,mu,K,t,eps)
-  alph=0.7
-  tol1=0.001
-  tol2=0.000001
-  tol3=0.001
-  
-  minerror=10000
-  mintheta<-0
-  for(i in 1:100){
-    grad=Graddat(theta,S0,mu,eps,daten)
-    olderror=sqrt(sum((Resi(theta,S0,mu,daten))^2))
-    grad[2]=0
-    grad=grad/sqrt(sum(abs(grad)))
-    thetanew=theta-alph*grad
-    
-    if(thetanew[2]<0){
-      thetanew[2]=0.03
-    }
-    
-    newerror=sqrt(sum((Resi(thetanew,S0,mu,daten))^2))
-    
-    if(newerror<minerror){
-      minerror<-newerror
-      mintheta<-thetanew
-    }
-    
-    if(newerror<olderror){
-      alph=1
-      theta=thetanew
-    }
-    
-    if(newerror>olderror){
-      alph=alph*0.7
-    }
-    
-    if(sqrt(sum(grad^2))<tol1){
-      print("Bed 1")
-      return(theta)
-    }
-    if(newerror<tol2){
-      print("Bed2")
-      print(olderror)
-      print(newerror)
-      return(theta)
-    }
-    if(thetanew[3]<(-1)){
-      print("Fuck you")
-      return(mintheta)
-    }
-    return(mintheta)
-    
-  }
-  
-  
-  
-}
 
 
 
@@ -194,7 +61,7 @@ GradVerfahren3<-function(theta,S0,mu,daten){
   #grad=GradCall(theta,S0,mu,K,t,eps)
   alph=0.1
   tol1=0.00001
-  tol2=0.0000001
+  tol2=0.001
   tol3=0.00001
   
   minerror=10000
@@ -257,13 +124,34 @@ GradVerfahren3<-function(theta,S0,mu,daten){
   
 }
 
-Pepsi=read.csv("Pepsi.csv",header = FALSE,dec = ".",sep=";")
-Cola=read.csv("Cola.csv",header=FALSE,dec=".",sep=";")
+#Pepsi=read.csv("Pepsi.csv",header = FALSE,dec = ".",sep=";")
+#Cola=read.csv("Cola.csv",header=FALSE,dec=".",sep=";")
 
-mu=0.001
+mu=0.005
 
+Savethet<-function(theta,mu,name){
+  readname=paste("S0_",name,".csv",sep="")
+  S0=read.csv(readname,header=FALSE,dec=".",sep=";")[[1]]
+  
+  readname2=paste("KTP_",name,".csv",sep="")
+  daten=read.csv(readname2,header=FALSE,dec=".",sep=";")
+  
+  if(length(daten[,1])>200){
+    vec=sample(1:length(daten[,1]))
+    daten=daten[vec,]
+    daten=daten[1:200,]
+  }
+  
+  erg=GradVerfahren3(theta,S0,mu,daten)
+  
+  datname=paste("theta",name,".csv",sep = "")
+  #write.csv(erg,file=datname,col.names = FALSE, sep=";",dec=".")
+  #erg=as.matrix(erg)
+  write.table(t(erg),row.names = FALSE,file=datname,col.names = FALSE,sep=";",dec=".")
+}
 
-thetapeps=GradVerfahren3(c(0.3,0.3,-0.7,1,0.3),110,mu,Pepsi)
+theta=c(0.2,0.2,-0.7,3,0.3)
+theta2=c(0.1,0.1,-0.4,3,0.2)
 
 
   #  GradVerfahren(theta,110,0.01,daten)

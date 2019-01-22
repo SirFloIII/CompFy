@@ -8,14 +8,15 @@ Created on Mon Jan 21 18:00:43 2019
 import optionsData as op
 import numpy
 
-Cola=op.getOptionDataFromYahoo("KO")
-Pepsi=op.getOptionDataFromYahoo("PEP")
+symbols = ["PEP", "KO", "IBM", "INTC", "NVDA", "GOOG", "AAPL", "XLK"]
 
-
-numpy.savetxt('Cola.csv', Cola, fmt='%f', delimiter=';')
-numpy.savetxt('Pepsi.csv',Pepsi,fmt='%f',delimiter=';')
-
-
-
-
-
+for s in symbols:
+    
+    S0 = op.getCurrentPrice(s)
+    numpy.savetxt("S0_"+s+".csv", [S0])
+    
+    data = op.getOptionDataFromYahoo(s)
+    data = data[data[:,0] < 2*S0]
+    numpy.savetxt("KTP_"+s+".csv", data, fmt = "%f", delimiter = ";")
+    
+    
