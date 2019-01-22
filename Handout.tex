@@ -100,8 +100,14 @@
 			Der genannte Basket besteht dabei aus folgenden Aktien: 6.5*Apple, Alphabet Inc., 22.5*Intel, 9*IBM und 7.3*NVIDIA.
 			Die Optionen werden jeweils zu den Expirationdates 1.2.2019, 15.2.2019 und 21.6.2019 bewertet.
 		\subsection*{Vorgehensweise}
-		Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren. Den endgültigen Optionspreis erhalten wir dann mit einer Monte Carlo Simulation.\\
-		Die Anfangsparameter Volatilität $v_0$, mittlere Volatilität $\bar{v}$, Korrelation zwischen Volatilität und Stockprice $\rho$, mean-reversion Parameter $\kappa$ und die Volatilität der Volatilität $\sigma$ ermitteln wir mit einem Gradientenverfahren.\\
+		Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren. Die Besonderheit des Hestonmodells liegt daran, dass es eine explizite Formel für Call-Preise existiert. Den endgültigen Optionspreis erhalten wir dann mit einer Monte Carlo Simulation.\\
+		Die Anfangsparameter Volatilität $v_0$, mittlere Volatilität $\bar{v}$, Korrelation zwischen Volatilität und Stockprice $\rho$, mean-reversion Parameter $\kappa$ und die Volatilität der Volatilität $\sigma$ ermitteln wir mit einem Gradientenverfahren. Hier geht die Existenz einer geschlossenen Formel für Call-Preise ein. Gegeben seien aktuelle Preise von Call-Optionen $C_i^*$ zu Zeiten $T_i$ mit strike $K_i$. Ziel ist es, einen Parameter $\theta*$ so zu wählen, dass die quadratischen Fehler minimiert werden:
+		\begin{gather*}
+		\theta*=\text{argmin}_{theta} f(\theta):=\sum_{i=1}^n \frac12 (C(\theta,T_i,K_i)-C*)^2.
+		\end{gather*}
+		Durch eine geschlossene Formel, die in dem R-Package "NMOF" implementiert ist, kann man ein effizientes Gradientenverfahren durchführen. Es zeigte sich, dass man für beliebig kleine Fehler ein geeignetes $\theta$ finden kann. Das Ergebnis hängt jedoch von der Wahl des Anfangspunktes ab, da nur lokale Minima gesucht werden. Deshalb ist es ratsam, Ergebnisse noch auf Plausibilität zu überprüfen.
+		
+		\\
 		Als Zinssatz $\mu$ verwenden wir die Durchschnittsrendite von zehnjährigen deutschen Staatsanleihen.\\
 		Schließlich benötigen wir noch die Korrelationen (welche wir als konstant annehmen!) zwischen den Stocks um mit diesen unsere Kovarianzmatrix für die in den Modellen auftretenden Normalverteilungen aufzustellen.
 		Wegen der Identität:
@@ -133,7 +139,7 @@
 		\end{align*}
 		Wir benötigen also eine vierdimensionale Normalverteilung mit:
 		
-		\begin{array}{c} $N^{KO}_1$\\ $N^{KO}_2$\\$N^{PEP}_1$\\ $N^{PEP}_2$
+
 		
 	\subsection*{Basket Optionen}		
 \end{document}
