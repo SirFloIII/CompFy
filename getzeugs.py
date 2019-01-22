@@ -8,22 +8,8 @@ Created on Mon Jan 21 18:00:43 2019
 import optionsData as op
 import numpy
 
-Cola=op.getOptionDataFromYahoo("KO")
-Pepsi=op.getOptionDataFromYahoo("PEP")
-IBM=op.getOptionDataFromYahoo("IBM")
-Intel=op.getOptionDataFromYahoo("INTC")
-NVIDIA=op.getCurrentPrice("NVDA")
-Google=op.getCurrentPrice("GOOG")
-Apple=op.getOptionDataFromYahoo("AAPL")
-XLK=op.getOptionDataFromYahoo("XLK")
+symbols = ["PEP", "KO", "IBM", "INTC", "NVDA", "GOOG", "AAPL"]
 
-
-numpy.savetxt('Cola.csv', Cola, fmt='%f', delimiter=';')
-numpy.savetxt('Pepsi.csv',Pepsi,fmt='%f',delimiter=';')
-numpy.savetxt('IBM.csv',IBM,fmt='%f',delimiter=';')
-numpy.savetxt('Intel.csv',Intel,,fmt='%f',delimiter=';')
-numpy.savetxt('NVDIA.csv',NVIDIA,fmt='%f',delimiter=';')
-
-
-
-
+for s in symbols:
+    data = op.getOptionDataFromYahoo(s)
+    numpy.savetxt(s+".csv", data, fmt = "%f", delimiter = ";")
