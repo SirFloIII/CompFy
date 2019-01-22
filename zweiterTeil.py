@@ -70,13 +70,13 @@ def CallOnMin(stocks, K, T):
         payoff.append(np.exp(-mü*T) * max(min([s.S[m][-1]*s.coeff for s in stocks[:-1]]) - K, 0))
     return np.average(payoff)
 
-def ExchangeWithMax(stocks, K, T):
+def ExchangeWithMax(stocks, T):
     payoff=[]
     for m in range(M):
         payoff.append(np.exp(-mü*T)*max(min([s.S[m][-1]*s.coeff for s in stocks[:-1]])-stocks[-1].S[m][-1]))
     return 0
 
-def ExchangeWithMin(stocks, K, T):
+def ExchangeWithMin(stocks, T):
     return 0
 
 """
