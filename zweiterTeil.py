@@ -66,9 +66,9 @@ def Exchange(stocks):
 def Call(stocks, K):
     return max(stocks[0].S[-1] - K, 0)
 
-n = 3
-symbols = ["IBM", "INTC", "NVDA"]
-coeffs = [9, 22.5, 7.3, 1, 6.4]
+n = 6
+symbols = ["IBM", "INTC", "NVDA","GOOG","AAPL","XLK"]
+coeffs = [9, 22.5, 7.3, 1, 6.4, 16.5]
 
 """
 n = 2
@@ -118,10 +118,25 @@ for ka in range(100):
                 sigma[2*j + 1, 2*i + 1] = sigma[2*i + 1, 2*j + 1]
     print(t,min(np.linalg.eigvals(sigma)))
 """
+minimierer=[1,-3]
 
-sigma = rohling.CorrMatrix(stocks, t)
-         
-np.linalg.cholesky(sigma)
+for ka in range(5,390):
+    sigma = rohling.CorrMatrix(stocks, ka)
+    #np.linalg.eigvals(sigma)
+    
+    for i in range(n):
+        sigma[2*i, 2*i + 1] = stocks[i].rho
+        sigma[2*i + 1, 2*i] = stocks[i].rho
+    if min(np.linalg.eigvals(sigma))>minimierer[1]:
+        minimierer=[ka,min(np.linalg.eigvals(sigma))]
+
+    print(ka,min(np.linalg.eigvals(sigma)))
+    
+sigma=rohling.CorrMatrix(stocks,minimierer[0])
+for i in range(n):
+        sigma[2*i, 2*i + 1] = stocks[i].rho
+        sigma[2*i + 1, 2*i] = stocks[i].rho
+sigma=(sigma-min(minimierer[1]-0.00001,0)*np.eye(2*n))
 
 dW = np.sqrt(h) * np.random.multivariate_normal(np.zeros(2 * n), sigma, (M, N))
 for i in range(n):
