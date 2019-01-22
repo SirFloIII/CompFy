@@ -30,6 +30,8 @@ class stock:
         self.symbol = symbol
         self.S0 = optionsData.getCurrentPrice(symbol)
         self.v0, self.vq, self.rho, self.kap, self.sigm = np.loadtxt("theta"+symbol+".csv", delimiter = ";")
+        self.v0 = self.v0**2
+        self.vq = self.vq**2
         self.coeff = coeff
         
         table = data.DataReader(symbol, "yahoo", start, end)
@@ -73,11 +75,14 @@ def CallOnMin(stocks, K, T):
 def ExchangeWithMax(stocks, T):
     payoff=[]
     for m in range(M):
-        payoff.append(np.exp(-mü*T)*max(min([s.S[m][-1]*s.coeff for s in stocks[:-1]])-stocks[-1].S[m][-1]))
-    return 0
+        payoff.append(np.exp(-mü*T)*max(max([s.S[m][-1]*s.coeff for s in stocks[:-1]])-stocks[-1].S[m][-1]*stocks[-1].coeff, 0))
+    return np.average(payoff)
 
 def ExchangeWithMin(stocks, T):
-    return 0
+    payoff=[]
+    for m in range(M):
+        payoff.append(np.exp(-mü*T)*max(min([s.S[m][-1]*s.coeff for s in stocks[:-1]])-stocks[-1].S[m][-1]*stocks[-1].coeff, 0))
+    return np.average(payoff)
 
 """
 Obsolete:
@@ -135,7 +140,7 @@ for ka in range(100):
 """
 minimierer=[1,-3]
 
-for ka in range(5,390):
+for ka in tqdm(range(5,390)):
     sigma = rohling.CorrMatrix(stocks, ka)
     #np.linalg.eigvals(sigma)
     
@@ -145,7 +150,7 @@ for ka in range(5,390):
     if min(np.linalg.eigvals(sigma))>minimierer[1]:
         minimierer=[ka,min(np.linalg.eigvals(sigma))]
 
-    print(ka,min(np.linalg.eigvals(sigma)))
+    #print(ka,min(np.linalg.eigvals(sigma)))
     
 sigma=rohling.CorrMatrix(stocks,minimierer[0])
 for i in range(n):
@@ -159,11 +164,10 @@ Ts = [(datetime.datetime.strptime(expdate, "%Y-%m-%d").timestamp()-now)/60/60/24
 
 Ks = [1050, 1060, 1072, 1120]
 
-Options = ["Call on max:", "Call on min", "Exchange with max", "Exchange with min"]
-payoffs = [lambda s, k, t : CallOnMax(s[:-1], k, t),
-           lambda s, k, t : CallOnMin(s[:-1], k, t),
-           ExchangeWithMax,
-           ExchangeWithMin]
+KTmax = dict()
+KTmin = dict()
+ETmax = dict()
+ETmin = dict()
 
 for T in Ts:
     
@@ -174,29 +178,67 @@ for T in Ts:
         stocks[i].dWS = dW[:,:,2*i]
         stocks[i].dWV = dW[:,:,2*i + 1]
     
-    payoff = []
+    
     for i in tqdm(range(M)):
         for s in stocks:
             s.V.append(compfy.EulerSDE(s.aV, s.bV, s.v0, T=T, N=N, dW = s.dWV[i], mode = "positive")[0])
             s.S.append(compfy.EulerSDE(s.aS, s.bS, s.S0, T=T, N=N, dW = s.dWS[i])[0])
     
     for K in Ks:
-        KT[()]
+        KTmax[(K, T)] = CallOnMax(stocks, K, T)
+        KTmin[(K, T)] = CallOnMin(stocks, K, T)
+    ETmax[T] = ExchangeWithMax(stocks, T)
+    ETmin[T] = ExchangeWithMin(stocks, T)
     
+    for s in stocks:
+        s.reset()
+
     
-    
-print("\nStrike | Call on max")
-for K in [1060, 1072, 1120]:   
-    print("{K}     {P:5.2f}$".format(K = K, P = CallOnMax(stocks, K)))
+print("\nCall on Max:")
+print("K\T ", *expdates)
+for K in Ks:
+    string = str(K)+" "
+    for T in Ts:
+        string += "{P:9.2f}$ ".format(P = KTmax[(K,T)])
+    print(string)
+
+print("\nCall on Min:")
+print("K\T ", *expdates)
+for K in Ks:
+    string = str(K)+" "
+    for T in Ts:
+        string += "{P:9.2f}$ ".format(P = KTmin[(K,T)])
+    print(string)
+
+print("\nExchange with max:")
+print("T ", *expdates)
+string = "   "
+for T in Ts:
+    string += "{P:9.2f}$ ".format(P = ETmax[T])
+print(string)
+
+print("\nExchange with min:")
+print("T ", *expdates)
+string = "   "
+for T in Ts:
+    string += "{P:9.2f}$ ".format(P = ETmin[T])
+print(string)
 
 
-print("\nStrike | Call in min")
-for K in [1050, 1060, 1072, 1120]:
-    print("{K}     {P:5.2f}$".format(K = K, P = CallOnMin(stocks, K)))
+h = T/(N-1)
+dW = np.sqrt(h) * np.random.multivariate_normal(np.zeros(2 * n), sigma, (M, N))
+for i in range(n):
+    stocks[i].dWS = dW[:,:,2*i]
+    stocks[i].dWV = dW[:,:,2*i + 1]
 
+for s in stocks:
+    s.reset()
+    s.V.append(compfy.EulerSDE(s.aV, s.bV, s.v0, T=T, N=N, dW = s.dWV[i], mode = "positive")[0])
+    s.S.append(compfy.EulerSDE(s.aS, s.bS, s.S0, T=T, N=N, dW = s.dWS[i])[0])
 
-
-
+for s in stocks:
+    plt.plot(s.S[0]*s.coeff)
+plt.legend(symbols)
 
 
 
