@@ -47,10 +47,10 @@ class stock:
         return mü * s
     
     def bS(self, t, s):
-        return np.sqrt(self.V[it(t)]) * s
+        return np.sqrt(self.V[-1][it(t)]) * s
     
     def adjustedEndValues(self):
-        return [s[-1] * self.cooef for s in self.S]
+        return [s[-1] * self.coeff for s in self.S]
         
 def CallOnMax(stocks):
     #return max(max([s.coeff * s.S[-1] for s in stocks]), 0)
