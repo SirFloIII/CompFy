@@ -62,7 +62,6 @@ def CallOnMax(stocks, K):
     payoff = []
     for m in range(M):
         payoff.append(max(max([s.S[m][-1]*s.coeff for s in stocks]) - K, 0))
-    
     return np.average(payoff)
 
 def CallOnMin(stocks, K):
@@ -145,8 +144,7 @@ for T in Ts:
         for s in stocks:
             s.V.append(compfy.EulerSDE(s.aV, s.bV, s.v0, T=T, N=N, dW = s.dWV[i], mode = "positive")[0])
             s.S.append(compfy.EulerSDE(s.aS, s.bS, s.S0, T=T, N=N, dW = s.dWS[i])[0])
-        #payoff.append(Call(stocks, 40))
-    
+        
     
     
 print("\nStrike | Call on max")
