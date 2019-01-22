@@ -19,8 +19,6 @@ Callpreis<-function(theta,S0,mu,K,t){
   return(erg)
   
 }
-theta=c(0.2,0.2,-0.7,3,0.3)
-theta2=c(0.1,0.1,-0.8,4,0.2)
 
 
 
@@ -133,7 +131,7 @@ mu=0.005
 
 Savethet<-function(theta,mu,name){
   readname=paste("S0_",name,".csv",sep="")
-  S0=read.csv(readname,header=FALSE,dec=".",sep=";")
+  S0=read.csv(readname,header=FALSE,dec=".",sep=";")[[1]]
   
   readname2=paste("KTP_",name,".csv",sep="")
   daten=read.csv(readname2,header=FALSE,dec=".",sep=";")
@@ -146,6 +144,8 @@ Savethet<-function(theta,mu,name){
   write.table(erg,file=datname,col.names = FALSE,sep=";",dec=".")
 }
 
+theta=c(0.2,0.2,-0.7,3,0.3)
+theta2=c(0.1,0.1,-0.5,4,0.3)
 
 
   #  GradVerfahren(theta,110,0.01,daten)
