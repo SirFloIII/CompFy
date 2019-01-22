@@ -2,7 +2,7 @@
 
 
 #theta=(v0,vbar,rho,kap,sigm)
-#setwd("C:/Users/thoma/OneDrive/Unizeug/Compfun")
+#setwd("C:/Users/Thomas/OneDrive/Unizeug/Compfun/CompFy")
 require("NMOF")
 
 
@@ -263,7 +263,13 @@ Cola=read.csv("Cola.csv",header=FALSE,dec=".",sep=";")
 
 mu=0.005
 
-
+Savethet<-function(theta,S0,mu,daten,name){
+  erg=GradVerfahren3(theta,S0,mu,daten)
+  datname=paste("theta",name,".csv",sep = "")
+  #write.csv(erg,file=datname,col.names = FALSE, sep=";",dec=".")
+  erg=as.matrix(erg)
+  write.table(erg,file=datname,col.names = FALSE,sep=";",dec=".")
+}
 
 
 
