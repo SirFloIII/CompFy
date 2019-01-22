@@ -57,27 +57,36 @@ class stock:
         self.S = []
         
         
-def CallOnMax(stocks, K):
+def CallOnMax(stocks, K, T):
     #return max(max([s.coeff * s.S[-1] for s in stocks]), 0)
     payoff = []
     for m in range(M):
-        payoff.append(max(max([s.S[m][-1]*s.coeff for s in stocks]) - K, 0))
+        payoff.append(np.exp(-mü*T) * max(max([s.S[m][-1]*s.coeff for s in stocks]) - K, 0))
     return np.average(payoff)
 
-def CallOnMin(stocks, K):
+def CallOnMin(stocks, K, T):
     payoff = []
     for m in range(M):
-        payoff.append(max(min([s.S[m][-1]*s.coeff for s in stocks]) - K, 0))
+        payoff.append(np.exp(-mü*T) * max(min([s.S[m][-1]*s.coeff for s in stocks]) - K, 0))
     return np.average(payoff)
 
+def ExchangeWithMax(stocks, K, T):
+    return 0
+
+def ExchangeWithMin(stocks, K, T):
+    return 0
+
+"""
+Obsolete:
 def Exchange(stocks):
     return max(stocks[0].coeff * stocks[0].S[-1] - stocks[1].coeff * stocks[1].S[-1], 0)
 
 def Call(stocks, K):
     return max(stocks[0].S[-1] - K, 0)
+"""
 
 n = 6
-symbols = ["IBM", "INTC", "NVDA","GOOG","AAPL","XLK"]
+symbols = ["IBM", "INTC", "NVDA", "GOOG", "AAPL", "XLK"]
 coeffs = [9, 22.5, 7.3, 1, 6.4, 16.5]
 
 """
@@ -145,6 +154,14 @@ now = time()
 expdates = ["2019-02-01", "2019-02-15", "2019-06-21"]
 Ts = [(datetime.datetime.strptime(expdate, "%Y-%m-%d").timestamp()-now)/60/60/24/356 for expdate in expdates]
 
+Ks = [1050, 1060, 1072, 1120]
+
+Options = ["Call on max:", "Call on min", "Exchange with max", "Exchange with min"]
+payoffs = [lambda s, k, t : CallOnMax(s[:-1], k, t),
+           lambda s, k, t : CallOnMin(s[:-1], k, t),
+           ExchangeWithMax,
+           ExchangeWithMin]
+
 for T in Ts:
     
     h = T/(N-1)
@@ -159,7 +176,10 @@ for T in Ts:
         for s in stocks:
             s.V.append(compfy.EulerSDE(s.aV, s.bV, s.v0, T=T, N=N, dW = s.dWV[i], mode = "positive")[0])
             s.S.append(compfy.EulerSDE(s.aS, s.bS, s.S0, T=T, N=N, dW = s.dWS[i])[0])
-        
+    
+    for K in Ks:
+        KT[()]
+    
     
     
 print("\nStrike | Call on max")
