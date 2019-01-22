@@ -54,139 +54,7 @@ Resi<-function(theta,S0,mu,daten){
   return(erg)
 }
 
-GradVerfahren<-function(theta,S0,mu,daten){
-  eps=0.0001
-  #grad=GradCall(theta,S0,mu,K,t,eps)
-  alph=0.1
-  tol1=0.00001
-  tol2=0.00001
-  tol3=0.00001
-  
-  minerror=10000
-  mintheta<-0
-  for(i in 1:1000){
-    grad=Graddat(theta,S0,mu,eps,daten)
-    olderror=sqrt(sum((Resi(theta,S0,mu,daten))^2))
-    #grad=grad/sqrt(sum(grad^2))
-    #grad=grad/abs(grad)
-    grad[2]=grad[2]/sqrt(sum(grad^2))
-    grad=grad/sqrt(sum(grad^2))
-    thetanew=theta-alph*grad
-    
-    if(thetanew[2]<0){
-      thetanew[2]=0.03
-    }
-    
-    if(thetanew[5]<0){
-      thetanew[5]=0.03
-    }
-    
-    if(thetanew[1]>0.6){
-      thetanew[1]=0.6
-    }
-    
-    "if(thetanew[3]<-1){
-      thetanew[3]=-0.9
-    }"
-    
-    newerror=sqrt(sum((Resi(thetanew,S0,mu,daten))^2))
-    
-    
-    if(newerror<minerror){
-      minerror<-newerror
-      mintheta<-thetanew
-      cat("NeFehl=",newerror,"theta=",thetanew,"\n")
-    }
-    
-    if(newerror<olderror){
-      alph=1
-      theta=thetanew
-    }
-    
-    if(newerror>olderror){
-      alph=alph*0.7
-    }
-    
-    if(sqrt(sum(grad^2))<tol1){
-     print("Bed 1")
-       return(theta)
-    }
-    if(newerror<tol2){
-      print("Bed2")
-      print(olderror)
-      print(newerror)
-      return(theta)
-    }
-    if(thetanew[3]<(-1)){
-      print("Fuck you")
-      return(mintheta)
-    }
-    
-    
-  }
-  return(mintheta)
-  
-  
-  }
 
-GradVerfahren2<-function(theta,S0,mu,daten){
-  eps=0.0001
-  #grad=GradCall(theta,S0,mu,K,t,eps)
-  alph=0.7
-  tol1=0.001
-  tol2=0.01
-  tol3=0.001
-  
-  minerror=10000
-  mintheta<-0
-  for(i in 1:100){
-    grad=Graddat(theta,S0,mu,eps,daten)
-    olderror=sqrt(sum((Resi(theta,S0,mu,daten))^2))
-    grad[2]=0
-    grad=grad/sqrt(sum(abs(grad)))
-    thetanew=theta-alph*grad
-    
-    if(thetanew[2]<0){
-      thetanew[2]=0.03
-    }
-    
-    newerror=sqrt(sum((Resi(thetanew,S0,mu,daten))^2))
-    
-    if(newerror<minerror){
-      minerror<-newerror
-      mintheta<-thetanew
-    }
-    
-    if(newerror<olderror){
-      alph=1
-      theta=thetanew
-    }
-    
-    if(newerror>olderror){
-      alph=alph*0.7
-    }
-    
-    if(sqrt(sum(grad^2))<tol1){
-      print("Bed 1")
-      return(theta)
-    }
-    if(newerror<tol2){
-      print("Bed2")
-      print(olderror)
-      print(newerror)
-      return(theta)
-    }
-    if(thetanew[3]<(-1)){
-      print("Fuck you")
-      return(mintheta)
-    }
-    return(mintheta)
-    
-  }
-  
-  
-  
-}
 
 
 
@@ -263,8 +131,15 @@ Cola=read.csv("Cola.csv",header=FALSE,dec=".",sep=";")
 
 mu=0.005
 
-Savethet<-function(theta,S0,mu,daten,name){
+Savethet<-function(theta,mu,name){
+  readname=paste("S0_",name,".csv",sep="")
+  S0=read.csv(readname,header=FALSE,dec=".",sep=";")
+  
+  readname2=paste("KTP_",name,".csv",sep="")
+  daten=read.csv(readname2,header=FALSE,dec=".",sep=";")
+  
   erg=GradVerfahren3(theta,S0,mu,daten)
+  
   datname=paste("theta",name,".csv",sep = "")
   #write.csv(erg,file=datname,col.names = FALSE, sep=";",dec=".")
   erg=as.matrix(erg)
