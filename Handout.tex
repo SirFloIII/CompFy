@@ -102,6 +102,7 @@
 		\subsection*{Vorgehensweise}
 		Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren. Den endgültigen Optionspreis erhalten wir dann mit einer Monte Carlo Simulation.\\
 		Die Anfangsparameter Volatilität $v_0$, mittlere Volatilität $\bar{v}$, Korrelation zwischen Volatilität und Stockprice $\rho$, mean-reversion Parameter $\kappa$ und die Volatilität der Volatilität $\sigma$ ermitteln wir mit einem Gradientenverfahren.\\
+		Als Zinssatz $\mu$ verwenden wir die Durchschnittsrendite von zehnjährigen deutschen Staatsanleihen.\\
 		Schließlich benötigen wir noch die Korrelationen (welche wir als konstant annehmen!) zwischen den Stocks um mit diesen unsere Kovarianzmatrix für die in den Modellen auftretenden Normalverteilungen aufzustellen.
 		Wegen der Identität:
 		\begin{align*}
@@ -111,4 +112,28 @@
 		\end{align*}
 		können wir die Korrelationsparameter aus historischen Daten berechnen.
 		\newpage
+	\subsection*{Coca-Cola/Pepsi Optionen}
+		Wir bewerten die Optionen: 
+		\begin{itemize}
+			\item[i)] Abgabe einer Pepsi-Aktie(PEP) für 2.3 Anteile einer Coca Cola Aktie(KO) mit Payoff-function:
+				\begin{equation*}
+				P=max((KO-2.3*PEP),0)
+				\end{equation*}			
+			\item[ii)] Abgabe von 2.3 Anteile einer Coca Cola Aktie für eine Pepsi Aktie mit Payoff-function:
+			\begin{equation*}
+			P=max((2.3*PEP-KO),0)
+			\end{equation*}			
+		\end{itemize}
+		Die Euler-Maruyama Diskretisierung des Hestonmodells liefert:
+		\begin{align*}
+		S^{KO}_{t+1}&=S^{KO}_{t}+\mu S^{KO}_{t}h+\sqrt{v^{KO}_t}S^{KO}_{t}\sqrt{h}N^{KO}_1\\
+		v^{KO}_{t+1}&=\kappa^{KO}(\bar{v}^{KO}-v^{KO}_t)h+v^{KO}_t+\sigma^{KO}\sqrt{v^{KO}_t}\sqrt{h}N^{KO}_2\\
+		S^{PEP}_{t+1}&=S^{PEP}_{t}+\mu S^{PEP}_{t}h+\sqrt{v^{PEP}_t}S^{PEP}_{t}\sqrt{h}N^{PEP}_1\\
+		v^{PEP}_{t+1}&=\kappa^{PEP}(\bar{v}^{PEP}-v^{PEP}_t)h+v^{PEP}_t+\sigma^{PEP}\sqrt{v^{PEP}_t}\sqrt{h}N^{PEP}_2
+		\end{align*}
+		Wir benötigen also eine vierdimensionale Normalverteilung mit:
+		
+		\begin{array}{c} $N^{KO}_1$\\ $N^{KO}_2$\\$N^{PEP}_1$\\ $N^{PEP}_2$
+		
+	\subsection*{Basket Optionen}		
 \end{document}
