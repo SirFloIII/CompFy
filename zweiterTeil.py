@@ -88,7 +88,7 @@ Ts = [(datetime.datetime.strptime(expdate, "%Y-%m-%d").timestamp()-now)/60/60/24
 
 T = Ts[2]
 
-t = 76
+t = 25
 mü = 0.01
 
 N = 1000 #steps per simulation
@@ -115,6 +115,7 @@ for i in range(n):
             sigma[2*j + 1, 2*i] = sigma[2*i, 2*j + 1]
             sigma[2*j, 2*i + 1] = sigma[2*i + 1, 2*j]
             sigma[2*j + 1, 2*i + 1] = sigma[2*i + 1, 2*j + 1]
+np.linalg.eigenvals(sigma)
             
 assert (sigma == sigma.T).all()
 #np.linalg.cholesky(sigma)
