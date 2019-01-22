@@ -156,11 +156,16 @@ Ts = [(datetime.datetime.strptime(expdate, "%Y-%m-%d").timestamp()-now)/60/60/24
 
 Ks = [1050, 1060, 1072, 1120]
 
-Options = ["Call on max:", "Call on min", "Exchange with max", "Exchange with min"]
-payoffs = [lambda s, k, t : CallOnMax(s[:-1], k, t),
-           lambda s, k, t : CallOnMin(s[:-1], k, t),
-           ExchangeWithMax,
-           ExchangeWithMin]
+Options = ["Call on max:", "Call on min:", "Exchange with max:", "Exchange with min:"]
+payoffs = {"Call on max:" : CallOnMax,
+           "Call on min:" : CallOnMin,
+           "Exchange with max:" : ExchangeWithMax,
+           "Exchange with min:" : ExchangeWithMin}
+
+KTmax = dict()
+KTmin = dict()
+ETmax = dict()
+ETmin = dict()
 
 for T in Ts:
     
@@ -178,19 +183,27 @@ for T in Ts:
             s.S.append(compfy.EulerSDE(s.aS, s.bS, s.S0, T=T, N=N, dW = s.dWS[i])[0])
     
     for K in Ks:
-        KT[()]
+        KTmax[(K, T)] = CallOnMax(stocks, K, T)
+        KTmin[(K, T)] = CallOnMin(stocks, K, T)
+    ETmax[T] = ExchangeWithMax(stocks, T)
+    ETmin[T] = ExchangeWithMin(stocks, T)
     
-    
-    
-print("\nStrike | Call on max")
-for K in [1060, 1072, 1120]:   
-    print("{K}     {P:5.2f}$".format(K = K, P = CallOnMax(stocks, K)))
+    stocks.reset()
 
+    
+    
+print("\nK\T  ", *expdates)
+for K in Ks:
+    string = str(K)+" "
+    for T in Ts:
+        string += "{P:9.2f}$ ".format(P = KTmax[(K,T)])
+    print(string)
 
+"""
 print("\nStrike | Call in min")
 for K in [1050, 1060, 1072, 1120]:
     print("{K}     {P:5.2f}$".format(K = K, P = CallOnMin(stocks, K)))
-
+"""
 
 
 
