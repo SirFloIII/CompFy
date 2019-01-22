@@ -61,7 +61,7 @@ GradVerfahren3<-function(theta,S0,mu,daten){
   #grad=GradCall(theta,S0,mu,K,t,eps)
   alph=0.1
   tol1=0.00001
-  tol2=0.0001
+  tol2=0.001
   tol3=0.00001
   
   minerror=10000
@@ -145,7 +145,7 @@ Savethet<-function(theta,mu,name){
 }
 
 theta=c(0.2,0.2,-0.7,3,0.3)
-theta2=c(0.1,0.1,-0.5,4,0.3)
+theta2=c(0.1,0.1,-0.4,3,0.2)
 
 
   #  GradVerfahren(theta,110,0.01,daten)
