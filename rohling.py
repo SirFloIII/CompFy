@@ -36,7 +36,7 @@ def StocktoVol(Stock,t):
     for i in range(len(Stock)-t):
         a=Stock[i:i+t]
         a=np.log(a[1:]/a[:-1])
-        erg.append(np.std(a))
+        erg.append(np.std(a)**2)
     return erg
 
 def getps():
