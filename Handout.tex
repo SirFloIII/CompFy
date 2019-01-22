@@ -97,15 +97,15 @@
 				\item Dem Kauf des Maximums aus dem Basket zum 16.5-fachen Kurs von XLK\footnote{Technology Select Sector SPDR Fund, ein Fond bestehend aus einigen IT-Firmen}
 				\item Dem Kauf des Minimums aus dem Basket zum 16.5-fachen Kurs von XLK
 			\end{itemize}
-			Der genannte Basket besteht dabei aus folgenden Aktien: 6.5*Apple, Alphabet Inc., 22.5*Intel, 9*IBM und 7.3*NVIDIA.
+			Der genannte Basket besteht dabei aus folgenden Aktien: 6.5 $\cdot$ Apple, 1 $\cdot$ Alphabet Inc., 22.5 $\cdot$ Intel, 9 $\cdot$ IBM und 7.3 $\cdot$ NVIDIA.
 			Die Optionen werden jeweils zu den Expirationdates 1.2.2019, 15.2.2019 und 21.6.2019 bewertet.
 		\subsection*{Vorgehensweise}
 		Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren. Die Besonderheit des Hestonmodells liegt daran, dass es eine explizite Formel für Call-Preise existiert. Den endgültigen Optionspreis erhalten wir dann mit einer Monte Carlo Simulation.\\
-		Die Anfangsparameter Volatilität $v_0$, mittlere Volatilität $\bar{v}$, Korrelation zwischen Volatilität und Stockprice $\rho$, mean-reversion Parameter $\kappa$ und die Volatilität der Volatilität $\sigma$ ermitteln wir mit einem Gradientenverfahren. Hier geht die Existenz einer geschlossenen Formel für Call-Preise ein. Gegeben seien aktuelle Preise von Call-Optionen $C_i^*$ zu Zeiten $T_i$ mit strike $K_i$. Ziel ist es, einen Parameter $\theta*$ so zu wählen, dass die quadratischen Fehler minimiert werden:
+		Die Anfangsparameter Volatilität $v_0$, mittlere Volatilität $\bar{v}$, Korrelation zwischen Volatilität und Stockprice $\rho$, mean-reversion Parameter $\kappa$ und die Volatilität der Volatilität $\sigma$ ermitteln wir mit einem Gradientenverfahren. Hier geht die Existenz einer geschlossenen Formel für Call-Preise ein. Gegeben seien aktuelle Preise von Call-Optionen $C_i^*$ zu Zeiten $T_i$ mit strike $K_i$. Ziel ist es, einen Parameter $\theta^*$ so zu wählen, dass die quadratischen Fehler minimiert werden:
 		\begin{gather*}
-		\theta*=\text{argmin}_{theta} f(\theta):=\sum_{i=1}^n \frac12 (C(\theta,T_i,K_i)-C*)^2.
+		\theta^*=\text{argmin}_{\theta} f(\theta):=\sum_{i=1}^n \frac12 (C(\theta,T_i,K_i)-C^*)^2.
 		\end{gather*}
-		Durch eine geschlossene Formel, die in dem R-Package "NMOF" implementiert ist, kann man ein effizientes Gradientenverfahren durchführen. Es zeigte sich, dass man für beliebig kleine Fehler ein geeignetes $\theta$ finden kann. Das Ergebnis hängt jedoch von der Wahl des Anfangspunktes ab, da nur lokale Minima gesucht werden. Deshalb ist es ratsam, Ergebnisse noch auf Plausibilität zu überprüfen.\\
+		Durch eine geschlossene Formel, die in dem R-Package \glqq NMOF\grqq\footnote{Basierend auf "Numerical Methods and Optimization in Finance" von M. Gilli, D. Maringer und E. Schumann (2011), ISBN 978-0123756626} implementiert ist, kann man ein effizientes Gradientenverfahren durchführen. Es zeigte sich, dass man für beliebig kleine Fehler ein geeignetes $\theta$ finden kann. Das Ergebnis hängt jedoch von der Wahl des Anfangspunktes ab, da nur lokale Minima gesucht werden. Deshalb ist es ratsam, Ergebnisse noch auf Plausibilität zu überprüfen.
 		
 		
 		Als Zinssatz $\mu$ verwenden wir die Durchschnittsrendite von zehnjährigen deutschen Staatsanleihen.\\
@@ -148,5 +148,65 @@
 		v_i=Var(ln(\frac{S_{k+1}}{S_k}))_{k\in\left[i-t,i\right)}
 		\end{equation*}
 		
-	\subsection*{Basket Optionen}		
+		
+	\subsection*{Basket Optionen}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+\begin{verbatim}
+Exchange PEP for 2.3*KO:
+2019-02-01 2019-02-15 2019-06-21
+     4.57$      6.99$     17.94$ 
+
+Exchange 2.3*KO for PEP:
+2019-02-01 2019-02-15 2019-06-21
+     4.73$      7.02$     15.89$
+\end{verbatim}
+     
+\begin{verbatim}
+     Call on Max:
+K\T  2019-02-01 2019-02-15 2019-06-21
+1050    100.59$    142.39$    333.03$ 
+1060     90.94$    133.08$    324.20$ 
+1072     79.76$    122.19$    313.76$ 
+1120     42.67$     84.02$    273.82$ 
+
+Call on Min:
+K\T  2019-02-01 2019-02-15 2019-06-21
+1050      1.60$      2.91$      8.71$ 
+1060      0.89$      1.99$      7.56$ 
+1072      0.37$      1.20$      6.34$ 
+1120      0.00$      0.10$      2.79$ 
+
+Exchange with Max:
+2019-02-01 2019-02-15 2019-06-21
+   109.05$    172.37$    377.73$ 
+
+Exchange with Min:
+2019-02-01 2019-02-15 2019-06-21
+    11.03$     23.03$     40.62$ 
+    \end{verbatim}
+	
+	
+	
+		
+	
 \end{document}
