@@ -73,7 +73,7 @@ Ts = [(datetime.datetime.strptime(expdate, "%Y-%m-%d").timestamp()-now)/60/60/24
 
 T = Ts[0]
 
-t = 42
+t = 76
 mü = 0.01
 
 N = 1000 #steps per simulation
@@ -102,7 +102,7 @@ for i in range(n):
 assert (sigma == sigma.T).all()
 #np.linalg.cholesky(sigma)
 
-dW = np.random.multivariate_normal(np.zeros(2 * n), sigma, (M, N))
+dW = np.sqrt(h) * np.random.multivariate_normal(np.zeros(2 * n), sigma, (M, N))
 for i in range(n):
     stocks[i].dWS = dW[:,:,2*i]
     stocks[i].dWV = dW[:,:,2*i + 1]
