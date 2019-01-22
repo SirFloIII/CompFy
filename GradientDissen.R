@@ -15,7 +15,7 @@ Callpreis<-function(theta,S0,mu,K,t){
   rho=theta[3]
   k=theta[4]
   sigma=theta[5]
- erg=callHestoncf(S0,K,t,r,q,v0,vT,rho,k,sigma) 
+  erg=callHestoncf(S0,K,t,r,q,v0,vT,rho,k,sigma) 
   return(erg)
   
 }
