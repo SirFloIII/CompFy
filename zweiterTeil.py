@@ -97,7 +97,7 @@ M = 1000 #num of simulations
 h = T/(N-1)
 
 stocks = [stock(s, c) for s, c in zip(symbols, coeffs)]
-
+"""
 #stocks.reverse()
 for ka in range(100):
     t=ka*5+3
@@ -117,9 +117,11 @@ for ka in range(100):
                 sigma[2*j, 2*i + 1] = sigma[2*i + 1, 2*j]
                 sigma[2*j + 1, 2*i + 1] = sigma[2*i + 1, 2*j + 1]
     print(t,min(np.linalg.eigvals(sigma)))
-            
-assert (sigma == sigma.T).all()
-#np.linalg.cholesky(sigma)
+"""
+
+sigma = rohling.CorrMatrix(stocks, t)
+         
+np.linalg.cholesky(sigma)
 
 dW = np.sqrt(h) * np.random.multivariate_normal(np.zeros(2 * n), sigma, (M, N))
 for i in range(n):
