@@ -21,9 +21,11 @@ XLK=op.getOptionDataFromYahoo("XLK")
 numpy.savetxt('Cola.csv', Cola, fmt='%f', delimiter=';')
 numpy.savetxt('Pepsi.csv',Pepsi,fmt='%f',delimiter=';')
 numpy.savetxt('IBM.csv',IBM,fmt='%f',delimiter=';')
-numpy.savetxt('Intel.csv',Intel,,fmt='%f',delimiter=';')
+numpy.savetxt('Intel.csv',Intel,fmt='%f',delimiter=';')
 numpy.savetxt('NVDIA.csv',NVIDIA,fmt='%f',delimiter=';')
-
+numpy.savetxt('Google.csv',Google,fmt='%f',delimiter=';')
+numpy.savetxt('Apple.csv',Apple,fmt='%f',delimiter=';')
+numpy.savetxt('XLK.csv',XLK,fmt='%f',delimiter=';')
 
 
 
