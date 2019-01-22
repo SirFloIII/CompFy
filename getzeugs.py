@@ -13,3 +13,6 @@ symbols = ["PEP", "KO", "IBM", "INTC", "NVDA", "GOOG", "AAPL", "XLK"]
 for s in symbols:
     data = op.getOptionDataFromYahoo(s)
     numpy.savetxt("KTP_"+s+".csv", data, fmt = "%f", delimiter = ";")
+    
+    S0 = [op.getCurrentPrice(s)]
+    numpy.savetxt("S0_"+s+".csv", S0)
