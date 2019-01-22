@@ -51,14 +51,25 @@ class stock:
     
     def adjustedEndValues(self):
         return [s[-1] * self.coeff for s in self.S]
+    
+    def reset(self):
+        self.V = []
+        self.S = []
         
-def CallOnMax(stocks):
+        
+def CallOnMax(stocks, K):
     #return max(max([s.coeff * s.S[-1] for s in stocks]), 0)
-    return np.average([max(max(ev), 0) for ev in zip([s.adjustedEndValues() for s in stocks])])
+    payoff = []
+    for m in range(M):
+        payoff.append(max(max([s.S[m][-1]*s.coeff for s in stocks]) - K, 0))
+    
+    return np.average(payoff)
 
-
-def CallOnMin(stocks):
-    return max(min([s.coeff * s.S[-1] for s in stocks]), 0)
+def CallOnMin(stocks, K):
+    payoff = []
+    for m in range(M):
+        payoff.append(max(min([s.S[m][-1]*s.coeff for s in stocks]) - K, 0))
+    return np.average(payoff)
 
 def Exchange(stocks):
     return max(stocks[0].coeff * stocks[0].S[-1] - stocks[1].coeff * stocks[1].S[-1], 0)
@@ -82,19 +93,12 @@ symbols = ["KO"]
 coeffs = [1]
 """
 
-now = time()
-expdates = ["2019-02-01", "2019-02-15", "2019-06-21"]
-Ts = [(datetime.datetime.strptime(expdate, "%Y-%m-%d").timestamp()-now)/60/60/24/356 for expdate in expdates]
-
-T = Ts[2]
-
 t = 25
 mü = 0.01
 
 N = 1000 #steps per simulation
 M = 1000 #num of simulations
 
-h = T/(N-1)
 
 stocks = [stock(s, c) for s, c in zip(symbols, coeffs)]
 """
@@ -123,25 +127,36 @@ sigma = rohling.CorrMatrix(stocks, t)
          
 np.linalg.cholesky(sigma)
 
-dW = np.sqrt(h) * np.random.multivariate_normal(np.zeros(2 * n), sigma, (M, N))
-for i in range(n):
-    stocks[i].dWS = dW[:,:,2*i]
-    stocks[i].dWV = dW[:,:,2*i + 1]
+now = time()
+expdates = ["2019-02-01", "2019-02-15", "2019-06-21"]
+Ts = [(datetime.datetime.strptime(expdate, "%Y-%m-%d").timestamp()-now)/60/60/24/356 for expdate in expdates]
 
-payoff = []
-for i in tqdm(range(M)):
-    for s in stocks:
-        s.V.append(compfy.EulerSDE(s.aV, s.bV, s.v0, T=T, N=N, dW = s.dWV[i], mode = "positive")[0])
-        s.S.append(compfy.EulerSDE(s.aS, s.bS, s.S0, T=T, N=N, dW = s.dWS[i])[0])
-    #payoff.append(Call(stocks, 40))
-"""    
-print(np.average(payoff))
+for T in Ts:
     
-for s in stocks:
-    plt.plot(s.S*s.coeff)
-"""
+    h = T/(N-1)
+    
+    dW = np.sqrt(h) * np.random.multivariate_normal(np.zeros(2 * n), sigma, (M, N))
+    for i in range(n):
+        stocks[i].dWS = dW[:,:,2*i]
+        stocks[i].dWV = dW[:,:,2*i + 1]
+    
+    payoff = []
+    for i in tqdm(range(M)):
+        for s in stocks:
+            s.V.append(compfy.EulerSDE(s.aV, s.bV, s.v0, T=T, N=N, dW = s.dWV[i], mode = "positive")[0])
+            s.S.append(compfy.EulerSDE(s.aS, s.bS, s.S0, T=T, N=N, dW = s.dWS[i])[0])
+        #payoff.append(Call(stocks, 40))
+    
+    
+    
+print("\nStrike | Call on max")
+for K in [1060, 1072, 1120]:   
+    print("{K}     {P:5.2f}$".format(K = K, P = CallOnMax(stocks, K)))
 
-CallOnMax(stocks)
+
+print("\nStrike | Call in min")
+for K in [1050, 1060, 1072, 1120]:
+    print("{K}     {P:5.2f}$".format(K = K, P = CallOnMin(stocks, K)))
 
 
 
