@@ -30,6 +30,8 @@ class stock:
         self.symbol = symbol
         self.S0 = optionsData.getCurrentPrice(symbol)
         self.v0, self.vq, self.rho, self.kap, self.sigm = np.loadtxt("theta"+symbol+".csv", delimiter = ";")
+        self.v0 = self.v0**2
+        self.vq = self.vq**2
         self.coeff = coeff
         
         table = data.DataReader(symbol, "yahoo", start, end)
@@ -51,24 +53,49 @@ class stock:
     
     def adjustedEndValues(self):
         return [s[-1] * self.coeff for s in self.S]
+    
+    def reset(self):
+        self.V = []
+        self.S = []
         
-def CallOnMax(stocks):
+        
+def CallOnMax(stocks, K, T):
     #return max(max([s.coeff * s.S[-1] for s in stocks]), 0)
-    return np.average([max(max(ev), 0) for ev in zip([s.adjustedEndValues() for s in stocks])])
+    payoff = []
+    for m in range(M):
+        payoff.append(np.exp(-mü*T) * max(max([s.S[m][-1]*s.coeff for s in stocks[:-1]]) - K, 0))
+    return np.average(payoff)
 
+def CallOnMin(stocks, K, T):
+    payoff = []
+    for m in range(M):
+        payoff.append(np.exp(-mü*T) * max(min([s.S[m][-1]*s.coeff for s in stocks[:-1]]) - K, 0))
+    return np.average(payoff)
 
-def CallOnMin(stocks):
-    return max(min([s.coeff * s.S[-1] for s in stocks]), 0)
+def ExchangeWithMax(stocks, T):
+    payoff=[]
+    for m in range(M):
+        payoff.append(np.exp(-mü*T)*max(max([s.S[m][-1]*s.coeff for s in stocks[:-1]])-stocks[-1].S[m][-1]*stocks[-1].coeff, 0))
+    return np.average(payoff)
 
+def ExchangeWithMin(stocks, T):
+    payoff=[]
+    for m in range(M):
+        payoff.append(np.exp(-mü*T)*max(min([s.S[m][-1]*s.coeff for s in stocks[:-1]])-stocks[-1].S[m][-1]*stocks[-1].coeff, 0))
+    return np.average(payoff)
+
+"""
+Obsolete:
 def Exchange(stocks):
     return max(stocks[0].coeff * stocks[0].S[-1] - stocks[1].coeff * stocks[1].S[-1], 0)
 
 def Call(stocks, K):
     return max(stocks[0].S[-1] - K, 0)
+"""
 
-n = 3
-symbols = ["IBM", "INTC", "NVDA"]
-coeffs = [9, 22.5, 7.3, 1, 6.4]
+n = 6
+symbols = ["IBM", "INTC", "NVDA", "GOOG", "AAPL", "XLK"]
+coeffs = [9, 22.5, 7.3, 1, 6.4, 16.5]
 
 """
 n = 2
@@ -82,19 +109,12 @@ symbols = ["KO"]
 coeffs = [1]
 """
 
-now = time()
-expdates = ["2019-02-01", "2019-02-15", "2019-06-21"]
-Ts = [(datetime.datetime.strptime(expdate, "%Y-%m-%d").timestamp()-now)/60/60/24/356 for expdate in expdates]
-
-T = Ts[2]
-
 t = 25
 mü = 0.01
 
 N = 1000 #steps per simulation
 M = 1000 #num of simulations
 
-h = T/(N-1)
 
 stocks = [stock(s, c) for s, c in zip(symbols, coeffs)]
 """
@@ -118,34 +138,107 @@ for ka in range(100):
                 sigma[2*j + 1, 2*i + 1] = sigma[2*i + 1, 2*j + 1]
     print(t,min(np.linalg.eigvals(sigma)))
 """
+minimierer=[1,-3]
 
-sigma = rohling.CorrMatrix(stocks, t)
-         
-np.linalg.cholesky(sigma)
+for ka in tqdm(range(5,390)):
+    sigma = rohling.CorrMatrix(stocks, ka)
+    #np.linalg.eigvals(sigma)
+    
+    for i in range(n):
+        sigma[2*i, 2*i + 1] = stocks[i].rho
+        sigma[2*i + 1, 2*i] = stocks[i].rho
+    if min(np.linalg.eigvals(sigma))>minimierer[1]:
+        minimierer=[ka,min(np.linalg.eigvals(sigma))]
 
+    #print(ka,min(np.linalg.eigvals(sigma)))
+    
+sigma=rohling.CorrMatrix(stocks,minimierer[0])
+for i in range(n):
+        sigma[2*i, 2*i + 1] = stocks[i].rho
+        sigma[2*i + 1, 2*i] = stocks[i].rho
+sigma=(sigma-min(minimierer[1]-0.00001,0)*np.eye(2*n))
+
+now = time()
+expdates = ["2019-02-01", "2019-02-15", "2019-06-21"]
+Ts = [(datetime.datetime.strptime(expdate, "%Y-%m-%d").timestamp()-now)/60/60/24/356 for expdate in expdates]
+
+Ks = [1050, 1060, 1072, 1120]
+
+KTmax = dict()
+KTmin = dict()
+ETmax = dict()
+ETmin = dict()
+
+for T in Ts:
+    
+    h = T/(N-1)
+    
+    dW = np.sqrt(h) * np.random.multivariate_normal(np.zeros(2 * n), sigma, (M, N))
+    for i in range(n):
+        stocks[i].dWS = dW[:,:,2*i]
+        stocks[i].dWV = dW[:,:,2*i + 1]
+    
+    
+    for i in tqdm(range(M)):
+        for s in stocks:
+            s.V.append(compfy.EulerSDE(s.aV, s.bV, s.v0, T=T, N=N, dW = s.dWV[i], mode = "positive")[0])
+            s.S.append(compfy.EulerSDE(s.aS, s.bS, s.S0, T=T, N=N, dW = s.dWS[i])[0])
+    
+    for K in Ks:
+        KTmax[(K, T)] = CallOnMax(stocks, K, T)
+        KTmin[(K, T)] = CallOnMin(stocks, K, T)
+    ETmax[T] = ExchangeWithMax(stocks, T)
+    ETmin[T] = ExchangeWithMin(stocks, T)
+    
+    for s in stocks:
+        s.reset()
+
+    
+print("\nCall on Max:")
+print("K\T ", *expdates)
+for K in Ks:
+    string = str(K)+" "
+    for T in Ts:
+        string += "{P:9.2f}$ ".format(P = KTmax[(K,T)])
+    print(string)
+
+print("\nCall on Min:")
+print("K\T ", *expdates)
+for K in Ks:
+    string = str(K)+" "
+    for T in Ts:
+        string += "{P:9.2f}$ ".format(P = KTmin[(K,T)])
+    print(string)
+
+print("\nExchange with max:")
+print("T ", *expdates)
+string = "   "
+for T in Ts:
+    string += "{P:9.2f}$ ".format(P = ETmax[T])
+print(string)
+
+print("\nExchange with min:")
+print("T ", *expdates)
+string = "   "
+for T in Ts:
+    string += "{P:9.2f}$ ".format(P = ETmin[T])
+print(string)
+
+
+h = T/(N-1)
 dW = np.sqrt(h) * np.random.multivariate_normal(np.zeros(2 * n), sigma, (M, N))
 for i in range(n):
     stocks[i].dWS = dW[:,:,2*i]
     stocks[i].dWV = dW[:,:,2*i + 1]
 
-payoff = []
-for i in tqdm(range(M)):
-    for s in stocks:
-        s.V.append(compfy.EulerSDE(s.aV, s.bV, s.v0, T=T, N=N, dW = s.dWV[i], mode = "positive")[0])
-        s.S.append(compfy.EulerSDE(s.aS, s.bS, s.S0, T=T, N=N, dW = s.dWS[i])[0])
-    #payoff.append(Call(stocks, 40))
-"""    
-print(np.average(payoff))
-    
 for s in stocks:
-    plt.plot(s.S*s.coeff)
-"""
+    s.reset()
+    s.V.append(compfy.EulerSDE(s.aV, s.bV, s.v0, T=T, N=N, dW = s.dWV[i], mode = "positive")[0])
+    s.S.append(compfy.EulerSDE(s.aS, s.bS, s.S0, T=T, N=N, dW = s.dWS[i])[0])
 
-CallOnMax(stocks)
-
-
-
-
+for s in stocks:
+    plt.plot(s.S[0]*s.coeff)
+plt.legend(symbols)
 
 
 
