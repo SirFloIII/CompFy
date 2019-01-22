@@ -220,14 +220,14 @@ if bsp == 2:
             string += "{P:9.2f}$ ".format(P = KTmin[(K,T)])
         print(string)
     
-    print("\nExchange with max:")
+    print("\nExchange with Max:")
     print(*expdates)
     string = ""
     for T in Ts:
         string += "{P:9.2f}$ ".format(P = ETmax[T])
     print(string)
     
-    print("\nExchange with min:")
+    print("\nExchange with Min:")
     print(*expdates)
     string = ""
     for T in Ts:
