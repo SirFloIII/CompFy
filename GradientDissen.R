@@ -124,8 +124,8 @@ GradVerfahren3<-function(theta,S0,mu,daten){
   
 }
 
-Pepsi=read.csv("Pepsi.csv",header = FALSE,dec = ".",sep=";")
-Cola=read.csv("Cola.csv",header=FALSE,dec=".",sep=";")
+#Pepsi=read.csv("Pepsi.csv",header = FALSE,dec = ".",sep=";")
+#Cola=read.csv("Cola.csv",header=FALSE,dec=".",sep=";")
 
 mu=0.005
 
@@ -140,8 +140,8 @@ Savethet<-function(theta,mu,name){
   
   datname=paste("theta",name,".csv",sep = "")
   #write.csv(erg,file=datname,col.names = FALSE, sep=";",dec=".")
-  erg=as.matrix(erg)
-  write.table(erg,file=datname,col.names = FALSE,sep=";",dec=".")
+  #erg=as.matrix(erg)
+  write.table(t(erg),row.names = FALSE,file=datname,col.names = FALSE,sep=";",dec=".")
 }
 
 theta=c(0.2,0.2,-0.7,3,0.3)
