@@ -66,8 +66,8 @@ def Exchange(stocks):
 def Call(stocks, K):
     return max(stocks[0].S[-1] - K, 0)
 
-n = 5
-symbols = ["IBM", "INTC", "NVDA", "GOOG", "AAPL"]
+n = 3
+symbols = ["IBM", "INTC", "NVDA"]
 coeffs = [9, 22.5, 7.3, 1, 6.4]
 
 """
@@ -99,23 +99,24 @@ h = T/(N-1)
 stocks = [stock(s, c) for s, c in zip(symbols, coeffs)]
 
 #stocks.reverse()
-
-sigma = np.eye(2*n)
-for i in range(n):
-    sigma[2*i, 2*i + 1] = stocks[i].rho
-    sigma[2*i + 1, 2*i] = stocks[i].rho
-    for j in range(n):
-        if i < j:
-            args = (stocks[i].history, stocks[j].history, t)
-            sigma[2*i, 2*j] = rohling.rhoSS(*args)
-            sigma[2*i, 2*j + 1] = rohling.rhoSV(*args)
-            sigma[2*i + 1, 2*j] = rohling.rhoVS(*args)
-            sigma[2*i + 1, 2*j + 1] = rohling.rhoVV(*args)
-            sigma[2*j, 2*i] = sigma[2*i, 2*j]
-            sigma[2*j + 1, 2*i] = sigma[2*i, 2*j + 1]
-            sigma[2*j, 2*i + 1] = sigma[2*i + 1, 2*j]
-            sigma[2*j + 1, 2*i + 1] = sigma[2*i + 1, 2*j + 1]
-np.linalg.eigenvals(sigma)
+for ka in range(100):
+    t=ka*5+3
+    sigma = np.eye(2*n)
+    for i in range(n):
+        sigma[2*i, 2*i + 1] = stocks[i].rho
+        sigma[2*i + 1, 2*i] = stocks[i].rho
+        for j in range(n):
+            if i < j:
+                args = (stocks[i].history, stocks[j].history, t)
+                sigma[2*i, 2*j] = rohling.rhoSS(*args)
+                sigma[2*i, 2*j + 1] = rohling.rhoSV(*args)
+                sigma[2*i + 1, 2*j] = rohling.rhoVS(*args)
+                sigma[2*i + 1, 2*j + 1] = rohling.rhoVV(*args)
+                sigma[2*j, 2*i] = sigma[2*i, 2*j]
+                sigma[2*j + 1, 2*i] = sigma[2*i, 2*j + 1]
+                sigma[2*j, 2*i + 1] = sigma[2*i + 1, 2*j]
+                sigma[2*j + 1, 2*i + 1] = sigma[2*i + 1, 2*j + 1]
+    print(t,min(np.linalg.eigvals(sigma)))
             
 assert (sigma == sigma.T).all()
 #np.linalg.cholesky(sigma)

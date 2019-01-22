@@ -30,6 +30,14 @@ def rhoVV(Stock1,Stock2,t):
     erg=np.corrcoef(V1,V2)
     return erg[0,1]
     
+def CorrMatrix(stocks,t):
+    m=[]
+    for s in stocks:
+        v=StocktoVol(s.history,t)
+        m.append(s.history[-len(v):])
+        m.append(v)
+    return np.corrcoef(m)
+    
 
 def StocktoVol(Stock,t):
     erg=[]
