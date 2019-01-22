@@ -105,9 +105,9 @@
 		\begin{gather*}
 		\theta*=\text{argmin}_{theta} f(\theta):=\sum_{i=1}^n \frac12 (C(\theta,T_i,K_i)-C*)^2.
 		\end{gather*}
-		Durch eine geschlossene Formel, die in dem R-Package "NMOF" implementiert ist, kann man ein effizientes Gradientenverfahren durchführen. Es zeigte sich, dass man für beliebig kleine Fehler ein geeignetes $\theta$ finden kann. Das Ergebnis hängt jedoch von der Wahl des Anfangspunktes ab, da nur lokale Minima gesucht werden. Deshalb ist es ratsam, Ergebnisse noch auf Plausibilität zu überprüfen.
+		Durch eine geschlossene Formel, die in dem R-Package "NMOF" implementiert ist, kann man ein effizientes Gradientenverfahren durchführen. Es zeigte sich, dass man für beliebig kleine Fehler ein geeignetes $\theta$ finden kann. Das Ergebnis hängt jedoch von der Wahl des Anfangspunktes ab, da nur lokale Minima gesucht werden. Deshalb ist es ratsam, Ergebnisse noch auf Plausibilität zu überprüfen.\\
 		
-		\\
+		
 		Als Zinssatz $\mu$ verwenden wir die Durchschnittsrendite von zehnjährigen deutschen Staatsanleihen.\\
 		Schließlich benötigen wir noch die Korrelationen (welche wir als konstant annehmen!) zwischen den Stocks um mit diesen unsere Kovarianzmatrix für die in den Modellen auftretenden Normalverteilungen aufzustellen.
 		Wegen der Identität:
@@ -117,7 +117,7 @@
 			&=Cor(\sqrt{v_0}S_0\sqrt{h}N_1,\sqrt{v_0}\tilde{S_0}\sqrt{h}N_2)=Cor(N_1,N_2)
 		\end{align*}
 		können wir die Korrelationsparameter aus historischen Daten berechnen.
-		\newpage
+		
 	\subsection*{Coca-Cola/Pepsi Optionen}
 		Wir bewerten die Optionen: 
 		\begin{itemize}
@@ -142,6 +142,11 @@
 		\left({\begin{array}{c} N_1\\ N_2\\ N_3\\ N_4\end{array}}\right) \sim N\left(\left({\begin{array}{c} 0 \\ 0 \\ 0 \\ 0 \end{array}}\right),\left({\begin{array}{cccc} 1 & \rho^1_2 & \rho^1_3 & \rho^1_4\\ \rho^1_2 & 1 & \rho^2_3 & \rho^2_4 \\ \rho^1_3 & \rho^2_3 & 1 & \rho^3_4 \\ \rho^1_4 & \rho^2_4 & \rho^3_4 & 1 \end{array}}\right)\right)
 		\end{equation*}
 		Wobei $\rho^{i}_j$ die Kovarianz von $N_i$ und $N_j$ bezeichnet.
-		Die Parameter $\rho^1_2$ und $\rho^3_4$ sind die Kovarianzen zwischen KO-Volatilität und KO-Stockprice (bzw. PEP-Volatilität und PEP-Stockprice) und werden daher vom Gradientenverfahren geliefert. 
+		Die Parameter $\rho^1_2$ und $\rho^3_4$ sind die Kovarianzen zwischen KO-Volatilität und KO-Stockprice (bzw. PEP-Volatilität und PEP-Stockprice) und werden daher vom Gradientenverfahren geliefert. Die anderen Einträge in der Kovarianzmatrix werden mittels dem historischen Verlauf der Stockprices und Volatilitäten von PEP und KO ermittelt. 
+		Für den historischen Verlauf der Volatilitäten wurde folgender Schätzer verwendet:
+		\begin{equation*}
+		v_i=Var(ln(\frac{S_{k+1}}{S_k}))_{k\in\left[i-t,i\right)}
+		\end{equation*}
+		
 	\subsection*{Basket Optionen}		
 \end{document}
