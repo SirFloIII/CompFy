@@ -8,8 +8,8 @@ Created on Mon Jan 21 18:00:43 2019
 import optionsData as op
 import numpy
 
-symbols = ["PEP", "KO", "IBM", "INTC", "NVDA", "GOOG", "AAPL"]
+symbols = ["PEP", "KO", "IBM", "INTC", "NVDA", "GOOG", "AAPL", "XLK"]
 
 for s in symbols:
     data = op.getOptionDataFromYahoo(s)
-    numpy.savetxt(s+".csv", data, fmt = "%f", delimiter = ";")
+    numpy.savetxt("KTP_"+s+".csv", data, fmt = "%f", delimiter = ";")
