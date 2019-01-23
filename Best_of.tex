@@ -41,33 +41,33 @@ In diesem Projekt geht es um die Bepreisung von Optionen, die von mehreren Aktie
 
 \section*{Aufgabenstellung}
 
-Im folgenden werden Rainbow-Options betrachtet. Diese sind im Gegenzug zu konventionellen Optionen nicht notwendigerweise auf nur ein Underlying und einen Strike Preis aufgebaut.
+Im Folgenden werden Rainbow-Optionen betrachtet. Diese sind im Gegenzug zu konventionellen Optionen nicht notwendigerweise auf nur ein Underlying und einen Strike-Preis aufgebaut.
 \newline
 Konkret werden diese Optionen betrachtet:
 \begin{itemize}
-	\item Abgabe einer Pepsi-Aktie für 2.3 Anteile einer Coca Cola Aktie
+	\item Abgabe einer Pepsi-Aktie für 2.3 Anteile einer Coca-Cola-Aktie
 		\begin{equation*}
-	P=max((2.3*PEP-KO),0)
+	P=\max((2.3\cdot PEP-KO),0)
 	\end{equation*}	
-	\item Abgabe von 2.3 Anteile einer Coca Cola Aktie für eine Pepsi Aktie
+	\item Abgabe von 2.3 Anteile einer Coca-Cola-Aktie für eine Pepsi-Aktie
 	\begin{equation*}
-	P=max((KO-2.3*PEP),0)
+	P=\max((KO-2.3\cdot PEP),0)
 	\end{equation*}	
-	\item Dem Kauf des Maximums aus einem Basket zu einem Strikepreis K
+	\item Kauf des Maximums aus einem Basket zu einem Strikepreis K
 	\begin{equation*}
 	\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
 	\end{equation*}
-	\item Dem Kauf des Minimums aus einem Basket zu einem Strikepreis K
+	\item Kauf des Minimums aus einem Basket zu einem Strikepreis K
 	
 	\begin{equation*}
 	\max(\min(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
 	\end{equation*}
-	\item Dem Kauf des Maximums aus einem Basket zum 16.5-fachen Kurs von XLK\footnote{Technology Select Sector SPDR Fund, ein Fond bestehend aus einigen IT-Firmen}
+	\item Kauf des Maximums aus einem Basket zum 16.5-fachen Kurs von XLK\footnote{Technology Select Sector SPDR Fund, ein Fond bestehend aus einigen IT-Firmen}
 	
 	\begin{equation*}
 	\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-XLK,0)
 	\end{equation*}
-	\item Dem Kauf des Minimums aus einem Basket zum 16.5-fachen Kurs von XLK
+	\item Kauf des Minimums aus einem Basket zum 16.5-fachen Kurs von XLK
 	
 	\begin{equation*}
 	\max(\min(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-XLK,0)
@@ -80,7 +80,64 @@ Die Optionen werden jeweils zu den Expirationdates 1.2.2019, 15.2.2019 und 21.6.
 \section*{Vorgehensweise}
 Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren.
 Das Heston-Modell für eine Option sieht folgendermaßen aus:
-\begin{align*} 
+
+
+Als Zinssatz $\mu$ verwenden wir die Durchschnittsrendite von zehnjährigen deutschen Staatsanleihen.\\
+Schließlich benötigen wir noch die Korrelationen (welche wir als konstant annehmen!) zwischen den Stocks um mit diesen unsere Kovarianzmatrix für die in den Modellen auftretenden Normalverteilungen aufzustellen.
+Wegen der Identität:
+\begin{align*}
+\rho_{1,2}&=Cor(S_t,\tilde{S_t})=\\
+&=Cor(S_0+\mu S_0h+\sqrt{v_0}S_0\sqrt{h}N_1,\tilde{S_0}+\mu \tilde{S_0}h+\sqrt{v_0}\tilde{S_0}\sqrt{h}N_2)= \\
+&=Cor(\sqrt{v_0}S_0\sqrt{h}N_1,\sqrt{v_0}\tilde{S_0}\sqrt{h}N_2)=Cor(N_1,N_2)
+\end{align*}
+können wir die Korrelationsparameter aus historischen Daten berechnen.
+
+
+Betrachte nun die ersten beiden Optionen:
+\begin{itemize}
+	\item[i)] Abgabe einer Pepsi-Aktie(PEP) für 2.3 Anteile einer Coca Cola Aktie(KO) mit Payoff-function:
+	\begin{equation*}
+	P=max((KO-2.3*PEP),0)
+	\end{equation*}			
+	\item[ii)] Abgabe von 2.3 Anteile einer Coca Cola Aktie für eine Pepsi Aktie mit Payoff-function:
+	\begin{equation*}
+	P=max((2.3*PEP-KO),0)
+	\end{equation*}			
+\end{itemize}
+
+Wir prognostizieren nun den Verlauf der beiden Aktien in der Zukunft bis zum Ausübungszeitpunkt, um zu sehen, wieviel Gewinn der Käufer im Durchschnitt zu erwarten hat. Dementsprechend bepreisen wir dann die Option zum jetzigen Zeitpunkt.
+
+
+\section{Coca-Cola gegen Pepsi}
+
+\subsection{Modell}
+
+Die zugrundeliegenden SPDEs sind für unsere Vorgehensweise It\={o}-Prozesse, wobei die Werte der Aktien immer in USD zu verstehen sind. Unsere Stocks beschreiben wir mithilfe der SPDE (normale Buchstaben beziehen sich im Folgenden immer auf Pepsi, während sich alle Zeichen mit Tilde (\~{}) auf Coca-Cola beziehen).
+
+\begin{align}\label{SPDEstock}
+dS_t = \mu S_t dt + \sqrt{v_t} S_t dW_t \\
+d\tilde{S}_t = \mu \tilde{S}_t dt + \sqrt{\tilde{v}_t} \tilde{S}_t d\tilde{W}_t
+\end{align}
+
+Dabei ist $\mu$ der risikolose Zins, der für beide Aktien derselbe ist. $v_t$ bzw. $\tilde{v}_t$ sind die Volatilitäten der beiden Aktien. In unserem Modell schränken wir uns nicht darauf ein, dass wir diese als konstant annehmen, sondern lassen hierfür Funktionen der Zeit zu. Hierdurch erwarten wir keine expliziten Lösungen mehr, aber im Gegenzug eine realistischere Modellierung des tatsächlichen Kurses. Wir schreiben außerdem zwei unterschiedliche Wiener Prozesse $W_t$ und $\tilde{W}_t$ an, um zu verdeutlichen, dass hier nicht beliebige Prozesse möglich sind, sondern dass wir davon ausgehen, dass die beiden Prozesse korreliert sind (was für die beiden Aktien eine durchaus schlüssige Annahme ist).
+
+Für die Volatilitäten $v_t$ und $\tilde{v}_t$ nehmen wir sogar stochastische Prozesse an. Diese modellieren wir nach dem Heston-Modell mit ''mean reversion''. Das heißt, wir nehmen an, es gibt einen ''Mittelwert'', um den sich die Volatilität bewegt - wobei punktuell größere Abweichungen bewirken, dass dann stärker wieder zurück geschwungen wird. Die SPDEs hierfür lauten
+
+\begin{align} \label{SPDEvol}
+dv_t = \kappa\cdot(\bar{v}-v_t) dt + \sigma \sqrt{v_t}dW_t \\
+d\tilde{v}_t = \tilde{\kappa}\cdot(\tilde{\bar{v}}-\tilde{v}_t) dt + \tilde{\sigma} \sqrt{\tilde{v}_t}d\tilde{W}_t
+\end{align}
+
+Hierin beschreiben $\kappa$ und $\tilde{\kappa}$, wie stark die Volatilität zum Mittelwert gezogen wird. $\bar{v}$, $\tilde{\bar{v}}$ sind die jeweiligen Mittelwerte. $\sigma$, $\tilde{\sigma}$ sind die Volatilitäten der Volatilitäten. Außerdem sei hier bemerkt, dass die Wiener Prozesse wieder unterschiedlich sind; sowohl zu einander, als auch zu denen aus den Gleichungen für die Stocks $S_t$ und $\tilde{S}_t$. Wir nehmen auch hier wieder an, dass die Prozesse korreliert sind. Wir haben also in Summe 4 Gleichungen mit stochastischen Prozessen, die alle untereinander korreliert sind.
+
+
+\subsubsection{Problematik}
+
+Um nun mit den Gleichungen arbeiten zu können, brauchen wir eine Vielzahl von Parametern. Das sind $\kappa, \bar{v}, \sigma, \tilde{\kappa}, \tilde{\bar{v}}, \tilde{\sigma}$. Außerdem noch die Korrelationen der Wiener Prozesse, und die Anfangswerte $S_0, \tilde{S}_0, v_0, \tilde{v}_0$ für die SPDEs. $S_0$ und $\tilde{S}_0$ sind bekannt; das sind die aktuellen Werte der Aktien.
+
+Wir betrachten die 4 korrelierten Gleichungen
+
+\begin{align*} \label{SPDE}
 dS_t &= \mu S_t dt + \sqrt{v_t} S_t dW^1_t \\
 dv_t &= \kappa\cdot(\bar{v}-v_t) dt + \sigma \sqrt{v_t}dW^2_t 
 \end{align*}
@@ -194,15 +251,11 @@ Exchange 16.5*XLK for Min(Basket):
 11.03$     23.03$     40.62$ 
 \end{verbatim}
 \subsection*{Anhang zur Visualisierung}
-Simulationen:
-\\
+
 \includegraphics[width=0.5\textwidth]{Teil1_1}	
 \includegraphics[width=0.5\textwidth]{Teil2_1}
 \includegraphics[width=0.5\textwidth]{Teil1_2}	
 \includegraphics[width=0.5\textwidth]{Teil2_2}
-\\
-Historische Aktienkurse:
-\\
 \includegraphics[width=0.5\textwidth]{Teil1_hist_2y}	
 \includegraphics[width=0.5\textwidth]{Teil2_hist_2y}	
 
