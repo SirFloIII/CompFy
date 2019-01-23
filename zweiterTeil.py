@@ -259,7 +259,7 @@ else:
 
 
 
-plt.figure(figsize = (10,8))
+plt.figure(figsize = (6,5))
 h = T/(N-1)
 dW = np.sqrt(h) * np.random.multivariate_normal(np.zeros(2 * n), sigma, (M, N))
 for i in range(n):
