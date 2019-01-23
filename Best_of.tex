@@ -59,23 +59,36 @@ Konkret werden diese Optionen betrachtet:
 	\begin{equation*}
 	\max(\min(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
 	\end{equation*}
-	\item Dem Kauf des Maximums aus dem Basket zum 16.5-fachen Kurs von XLK\footnote{Technology Select Sector SPDR Fund, ein Fond bestehend aus einigen IT-Firmen}
+	\item Dem Kauf des Maximums aus einem Basket zum 16.5-fachen Kurs von XLK\footnote{Technology Select Sector SPDR Fund, ein Fond bestehend aus einigen IT-Firmen}
 	
 	\begin{equation*}
-	\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
+	\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-XLK,0)
 	\end{equation*}
-	\item Dem Kauf des Minimums aus dem Basket zum 16.5-fachen Kurs von XLK
+	\item Dem Kauf des Minimums aus einem Basket zum 16.5-fachen Kurs von XLK
 	
 	\begin{equation*}
-	\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
+	\max(\min(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-XLK,0)
 	\end{equation*}
 	
 
 \end{itemize}
-Der genannte Basket besteht dabei aus folgenden Aktien: 6.5 $\cdot$ Apple, 1 $\cdot$ Alphabet Inc., 22.5 $\cdot$ Intel, 9 $\cdot$ IBM und 7.3 $\cdot$ NVIDIA.
+
 Die Optionen werden jeweils zu den Expirationdates 1.2.2019, 15.2.2019 und 21.6.2019 bewertet.
 \subsection*{Vorgehensweise}
-Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren. Die Besonderheit des Hestonmodells liegt daran, dass es eine explizite Formel für Call-Preise existiert. Den endgültigen Optionspreis erhalten wir dann mit einer Monte Carlo Simulation.\\
+Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren. Die Besonderheit des Hestonmodells liegt daran, dass es eine explizite Formel für Call-Preise existiert. Den endgültigen Optionspreis erhalten wir dann mit einer Monte Carlo Simulation. Für die ersten beiden Teile der Aufgebenstellung ergibt sich folgendes Modell:
+\begin{align*}
+S^{KO}_{t+1}&=S^{KO}_{t}+\mu S^{KO}_{t}h+\sqrt{v^{KO}_t}S^{KO}_{t}\sqrt{h}N_1\\
+v^{KO}_{t+1}&=\kappa^{KO}(\bar{v}^{KO}-v^{KO}_t)h+v^{KO}_t+\sigma^{KO}\sqrt{v^{KO}_t}\sqrt{h}N_2\\
+S^{PEP}_{t+1}&=S^{PEP}_{t}+\mu S^{PEP}_{t}h+\sqrt{v^{PEP}_t}S^{PEP}_{t}\sqrt{h}N_3\\
+v^{PEP}_{t+1}&=\kappa^{PEP}(\bar{v}^{PEP}-v^{PEP}_t)h+v^{PEP}_t+\sigma^{PEP}\sqrt{v^{PEP}_t}\sqrt{h}N_4
+\end{align*}
+Wir benötigen also eine vierdimensionale Normalverteilung mit:
+\begin{equation*}
+\left({\begin{array}{c} N_1\\ N_2\\ N_3\\ N_4\end{array}}\right) \sim N\left(\left({\begin{array}{c} 0 \\ 0 \\ 0 \\ 0 \end{array}}\right),\left({\begin{array}{cccc} 1 & \rho^1_2 & \rho^1_3 & \rho^1_4\\ \rho^1_2 & 1 & \rho^2_3 & \rho^2_4 \\ \rho^1_3 & \rho^2_3 & 1 & \rho^3_4 \\ \rho^1_4 & \rho^2_4 & \rho^3_4 & 1 \end{array}}\right)\right)
+\end{equation*}
+
+Es sind nun jeweils die Heston-Modellparameter $\theta=(v_0,\bar v, \rho, \kappa, \sigma)$, der risikolose Zins $\mu$ 
+
 Die Anfangsparameter Volatilität $v_0$, mittlere Volatilität $\bar{v}$, Korrelation zwischen Volatilität und Stockprice $\rho$, mean-reversion Parameter $\kappa$ und die Volatilität der Volatilität $\sigma$ ermitteln wir mit einem Gradientenverfahren. Hier geht die Existenz einer geschlossenen Formel für Call-Preise ein. Gegeben seien aktuelle Preise von Call-Optionen $C_i^*$ zu Zeiten $T_i$ mit strike $K_i$. Ziel ist es, einen Parameter $\theta^*$ so zu wählen, dass die quadratischen Fehler minimiert werden:
 \begin{gather*}
 \theta^*=\text{argmin}_{\theta} f(\theta):=\sum_{i=1}^n \frac12 (C(\theta,T_i,K_i)-C^*)^2.
