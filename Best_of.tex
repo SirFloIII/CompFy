@@ -98,6 +98,21 @@ Wir benötigen also eine vierdimensionale Normalverteilung mit:
 
 Es sind nun jeweils die Heston-Modellparameter $\theta=(v_0,\bar v, \rho, \kappa, \sigma)$, der risikolose Zins $\mu$ und die Korrelationen $\rho^i_j$ zu ermitteln. $\rho^{i}_j$ bezeichnet die Korrelation von $N_i$ und $N_j$.
 
+Um realistische Ergebnisse zu erhalten, legen wir folgende Rahmenwerte für die Parameter fest:
+
+% \usepackage{array} is required
+
+
+
+
+
+\begin{gather*}
+v_0 \in (0.05,0.95) \\
+\bar v  \in (0.05,0.95) \\
+\rho \in (-0.90,-0.10) \\
+\kappa \in (1,5) \\
+\sigma \in (0.05,0.95).
+\end{gather*}
 
 
 
@@ -129,7 +144,6 @@ Die gefragten Parameter ergeben sich dann aus der Stichprobenkrrelation unserer 
 Für die Bewertung der vier anderen Optionen gehen wir analog zu den ersten beiden Optionen vor, wobei sich statt einer vierdimensionalen Normalverteilung eine zehn- bzw. zwölfdimensionale ergibt.
 
 
-\pagebreak
 
 \section*{Simulation}
 
