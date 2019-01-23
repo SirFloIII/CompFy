@@ -117,17 +117,17 @@
 	
 	
 	
-	Die Heston-Parameter $\theta$ ermitteln wir mit einem Gradientenverfahren: Gegeben seien aktuelle Preise von Call-Optionen $C_i^*$ zu Zeiten $T_i$ mit strike $K_i$. Ziel ist es, einen Parameter $\theta^*$ so zu wählen, dass die quadratischen Fehler minimiert werden:
+	Die Heston-Parameter $\theta$ ermitteln wir mit einem Gradientenverfahren: Gegeben seien aktuelle Preise von Call-Optionen $C_i^*$ zu Zeiten $T_i$ mit Strike $K_i$. Ziel ist es, einen Parameter $\theta^*$ so zu wählen, dass die quadratischen Fehler minimiert werden:
 	\begin{gather*}
 	\theta^*=\text{argmin}_{\theta} r(\theta):=\sum_{i=1}^n \frac12 (C(\theta,T_i,K_i)-C^*)^2.
 	\end{gather*}
 	Durch eine geschlossene Formel, die in dem R-Package \glqq NMOF\grqq\footnote{Basierend auf "Numerical Methods and Optimization in Finance" von M. Gilli, D. Maringer und E. Schumann (2011), ISBN 978-0123756626} implementiert ist, kann man ein effizientes Gradientenverfahren durchführen. Es zeigte sich sogar, dass man für beliebig kleine Fehler ein geeignetes $\theta$ finden kann. Das Ergebnis hängt jedoch von der Wahl des Anfangspunktes ab, da nur lokale Minima gesucht werden. Deshalb ist es notwendig, Ergebnisse noch auf Plausibilität zu überprüfen.
 	
 	Als Zinssatz $\mu$ verwenden wir die Durchschnittsrendite von zehnjährigen deutschen Staatsanleihen. 
-	Schließlich benötigen wir noch die Korrelationen (welche wir als konstant annehmen!) zwischen den Stocks um mit diesen unsere Kovarianzmatrix für die in den Modellen auftretenden Normalverteilungen aufzustellen.
+	Schließlich benötigen wir noch die Korrelationen (welche wir als konstant annehmen!) zwischen den Stocks, um mit diesen unsere Kovarianzmatrix für die in den Modellen auftretenden Normalverteilungen aufzustellen.
 	
-	Die Parameter $\rho^1_2$ und $\rho^3_4$ sind bereits in den Parametern der entsprechenden Heston-Modelle erhalten. 
-	Wegen der Identität:
+	Die Parameter $\rho^1_2$ und $\rho^3_4$ sind bereits in den Parametern der entsprechenden Heston-Modelle enthalten. 
+	Wegen der Identität
 	\begin{gather*}
 	Cor(S^{KO}_t,S^{PEP}_t)= \\
 	Cor\left(S^{KO}_0+\mu S^{KO}_0h+\sqrt{v^{KO}_0}S^{KO}_0\sqrt{h}N_1,S^{PEP}_0+\mu S^{PEP}_0h+\sqrt{vS^{PEP}_0}S^{PEP}_0\sqrt{h}N_2\right)= \\
@@ -137,9 +137,9 @@
 	
 	Für den historischen Verlauf der Volatilitäten wurde folgender Schätzer verwendet:
 	\begin{equation*}
-	v_i=Var\left(ln\left(\frac{S_{k+1}}{S_k}\right)\right)_{k\in\left[i-t,i\right)}
+	v_i=Var\left(\ln\left(\frac{S_{k+1}}{S_k}\right)\right)_{k\in\left[i-t,i\right)}
 	\end{equation*}
-	Die gefragten Parameter ergeben sich dann aus der Stichprobenkrrelation unserer historischen Daten.
+	Die gefragten Parameter ergeben sich dann aus der Stichprobenkorrelation unserer historischen Daten.
 	
 	Für die Bewertung der vier anderen Optionen gehen wir analog zu den ersten beiden Optionen vor, wobei sich statt einer vierdimensionalen Normalverteilung eine zehn- bzw. zwölfdimensionale ergibt.
 	
@@ -147,8 +147,7 @@
 	
 	\section*{Simulation}
 	
-	Damit haben wir alles was wir benötigen um unsere Monte Carlo Simulation zu starten.
-	Für die Bewertung der vier anderen Optionen gehen wir analog zu den ersten beiden Optionen vor, wobei sich statt einer vierdimensionalen Normalverteilung eine zehn- bzw. zwölfdimensionale ergibt.
+	Damit haben wir alles, was wir benötigen, um unsere Monte-Carlo-Simulation zu starten.
 	
 	
 	
