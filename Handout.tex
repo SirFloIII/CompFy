@@ -118,8 +118,8 @@
 		\end{align*}
 		können wir die Korrelationsparameter aus historischen Daten berechnen.
 		
-	\subsection*{Coca-Cola/Pepsi Optionen}
-		Wir bewerten die Optionen: 
+	
+		Betrachte nun die ersten beiden Optionen:
 		\begin{itemize}
 			\item[i)] Abgabe einer Pepsi-Aktie(PEP) für 2.3 Anteile einer Coca Cola Aktie(KO) mit Payoff-function:
 				\begin{equation*}
@@ -147,65 +147,64 @@
 		\begin{equation*}
 		v_i=Var(ln(\frac{S_{k+1}}{S_k}))_{k\in\left[i-t,i\right)}
 		\end{equation*}
+		Die gefragten Parameter ergeben sich dann aus der Stichprobenkovarianz unserer historischen Daten.\\
+		Damit haben wir alles was wir benötigen um unsere Monte Carlo Simulation zu starten.
+		Für die Bewertung der vier anderen Optionen gehen wir analog zu den ersten beiden Optionen vor, wobei sich statt einer vierdimensionalen Normalverteilung eine zehn- bzw. zwölfdimensionale ergibt.
+		
+		
+		Schlussendlich ergibt unsere Optionsbewertung folgende Ergebnisse:
+		\subsection*{Coca-Cola/Pepsi Optionen}
+		
+		\begin{verbatim}
+		Exchange PEP for 2.3*KO:
+		2019-02-01 2019-02-15 2019-06-21
+		4.57$      6.99$     17.94$ 
+		
+		Exchange 2.3*KO for PEP:
+		2019-02-01 2019-02-15 2019-06-21
+		4.73$      7.02$     15.89$
+		\end{verbatim}
 		
 		
 	\subsection*{Basket Optionen}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
 
-\begin{verbatim}
-Exchange PEP for 2.3*KO:
-2019-02-01 2019-02-15 2019-06-21
-     4.57$      6.99$     17.94$ 
-
-Exchange 2.3*KO for PEP:
-2019-02-01 2019-02-15 2019-06-21
-     4.73$      7.02$     15.89$
-\end{verbatim}
      
 \begin{verbatim}
-     Call on Max:
+Call on Max(Basket):
 K\T  2019-02-01 2019-02-15 2019-06-21
 1050    100.59$    142.39$    333.03$ 
 1060     90.94$    133.08$    324.20$ 
 1072     79.76$    122.19$    313.76$ 
 1120     42.67$     84.02$    273.82$ 
 
-Call on Min:
+Call on Min(Basket):
 K\T  2019-02-01 2019-02-15 2019-06-21
 1050      1.60$      2.91$      8.71$ 
 1060      0.89$      1.99$      7.56$ 
 1072      0.37$      1.20$      6.34$ 
 1120      0.00$      0.10$      2.79$ 
 
-Exchange with Max:
+Exchange 16.5*XLK for Max(Basket):
 2019-02-01 2019-02-15 2019-06-21
    109.05$    172.37$    377.73$ 
 
-Exchange with Min:
+Exchange 16.5*XLK for Min(Basket):
 2019-02-01 2019-02-15 2019-06-21
     11.03$     23.03$     40.62$ 
     \end{verbatim}
-	
-	
+\subsection*{Anhang zur Visualisierung}
+Simulationen:
+\\
+\includegraphics[width=0.5\textwidth]{Teil1_1}	
+\includegraphics[width=0.5\textwidth]{Teil2_1}
+\includegraphics[width=0.5\textwidth]{Teil1_2}	
+\includegraphics[width=0.5\textwidth]{Teil2_2}
+\\
+Historische Aktienkurse:
+\\
+\includegraphics[width=0.5\textwidth]{Teil1_hist_2y}	
+\includegraphics[width=0.5\textwidth]{Teil2_hist_2y}	
 	
 		
 	
