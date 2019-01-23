@@ -41,33 +41,33 @@ In diesem Projekt geht es um die Bepreisung von Optionen, die von mehreren Aktie
 
 \section*{Aufgabenstellung}
 
-Im folgenden werden Rainbow-Options betrachtet. Diese sind im Gegenzug zu konventionellen Optionen nicht notwendigerweise auf nur ein Underlying und einen Strike Preis aufgebaut.
+Im Folgenden werden Rainbow-Optionen betrachtet. Diese sind im Gegenzug zu konventionellen Optionen nicht notwendigerweise auf nur ein Underlying und einen Strike-Preis aufgebaut.
 \newline
 Konkret werden diese Optionen betrachtet:
 \begin{itemize}
-	\item Abgabe einer Pepsi-Aktie für 2.3 Anteile einer Coca Cola Aktie
+	\item Abgabe einer Pepsi-Aktie für 2.3 Anteile einer Coca-Cola-Aktie
 		\begin{equation*}
-	P=max((2.3*PEP-KO),0)
+	P=\max((2.3\cdot PEP-KO),0)
 	\end{equation*}	
-	\item Abgabe von 2.3 Anteile einer Coca Cola Aktie für eine Pepsi Aktie
+	\item Abgabe von 2.3 Anteile einer Coca-Cola-Aktie für eine Pepsi-Aktie
 	\begin{equation*}
-	P=max((KO-2.3*PEP),0)
+	P=\max((KO-2.3\cdot PEP),0)
 	\end{equation*}	
-	\item Dem Kauf des Maximums aus einem Basket zu einem Strikepreis K
+	\item Kauf des Maximums aus einem Basket zu einem Strikepreis K
 	\begin{equation*}
 	\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
 	\end{equation*}
-	\item Dem Kauf des Minimums aus einem Basket zu einem Strikepreis K
+	\item Kauf des Minimums aus einem Basket zu einem Strikepreis K
 	
 	\begin{equation*}
 	\max(\min(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
 	\end{equation*}
-	\item Dem Kauf des Maximums aus einem Basket zum 16.5-fachen Kurs von XLK\footnote{Technology Select Sector SPDR Fund, ein Fond bestehend aus einigen IT-Firmen}
+	\item Kauf des Maximums aus einem Basket zum 16.5-fachen Kurs von XLK\footnote{Technology Select Sector SPDR Fund, ein Fond bestehend aus einigen IT-Firmen}
 	
 	\begin{equation*}
 	\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-XLK,0)
 	\end{equation*}
-	\item Dem Kauf des Minimums aus einem Basket zum 16.5-fachen Kurs von XLK
+	\item Kauf des Minimums aus einem Basket zum 16.5-fachen Kurs von XLK
 	
 	\begin{equation*}
 	\max(\min(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-XLK,0)
@@ -137,7 +137,7 @@ Um nun mit den Gleichungen arbeiten zu können, brauchen wir eine Vielzahl von P
 
 Wir betrachten die 4 korrelierten Gleichungen
 
-\begin{align} \label{SPDE}
+\begin{align*} \label{SPDE}
 dS_t &= \mu S_t dt + \sqrt{v_t} S_t dW^1_t \\
 dv_t &= \kappa\cdot(\bar{v}-v_t) dt + \sigma \sqrt{v_t}dW^2_t 
 \end{align*}
