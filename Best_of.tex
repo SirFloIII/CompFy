@@ -28,6 +28,7 @@
 \author{Hubert Hackl, Florian Bogner, Martin Vetter, Thomas Wagenhofer}
 
 \setlength{\parindent}{0pt}
+\setlength{\parskip}{2pt}
 
 \begin{document}
 
@@ -79,12 +80,10 @@ Die Optionen werden jeweils zu den Expirationdates 1.2.2019, 15.2.2019 und 21.6.
 \section*{Vorgehensweise}
 Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren.
 Das Heston-Modell für eine Option sieht folgendermaßen aus:
-
-\begin{align} \label{SPDE}
+\begin{align*} 
 dS_t &= \mu S_t dt + \sqrt{v_t} S_t dW^1_t \\
-dv_t &= \kappa\cdot(\bar{v}-v_t) dt + \sigma \sqrt{v_t}dW^2_t \\
-\end{align}
-
+dv_t &= \kappa\cdot(\bar{v}-v_t) dt + \sigma \sqrt{v_t}dW^2_t 
+\end{align*}
  Die Besonderheit des Hestonmodells liegt daran, dass es eine explizite Formel für Call-Preise existiert. Den endgültigen Optionspreis erhalten wir dann mit einer Monte Carlo Simulation. Für die ersten beiden Teile der Aufgebenstellung ergibt sich folgendes Modell:
 \begin{align*}
 S^{KO}_{t+1}&=S^{KO}_{t}+\mu S^{KO}_{t}h+\sqrt{v^{KO}_t}S^{KO}_{t}\sqrt{h}N_1\\
@@ -97,10 +96,7 @@ Wir benötigen also eine vierdimensionale Normalverteilung mit:
 \left({\begin{array}{c} N_1\\ N_2\\ N_3\\ N_4\end{array}}\right) \sim N\left(\left({\begin{array}{c} 0 \\ 0 \\ 0 \\ 0 \end{array}}\right),\left({\begin{array}{cccc} 1 & \rho^1_2 & \rho^1_3 & \rho^1_4\\ \rho^1_2 & 1 & \rho^2_3 & \rho^2_4 \\ \rho^1_3 & \rho^2_3 & 1 & \rho^3_4 \\ \rho^1_4 & \rho^2_4 & \rho^3_4 & 1 \end{array}}\right)\right)
 \end{equation*}
 
-Es sind nun jeweils die Heston-Modellparameter $\theta=(v_0,\bar v, \rho, \kappa, \sigma)$, der risikolose Zins $\mu$ und die Korrelationen $\rho^i_j$ zu ermitteln.
-
-
-$\rho^{i}_j$ bezeichnet die Korrelation von $N_i$ und $N_j$.
+Es sind nun jeweils die Heston-Modellparameter $\theta=(v_0,\bar v, \rho, \kappa, \sigma)$, der risikolose Zins $\mu$ und die Korrelationen $\rho^i_j$ zu ermitteln. $\rho^{i}_j$ bezeichnet die Korrelation von $N_i$ und $N_j$.
 
 
 
@@ -108,28 +104,29 @@ $\rho^{i}_j$ bezeichnet die Korrelation von $N_i$ und $N_j$.
 
 Die Heston-Parameter $\theta$ ermitteln wir mit einem Gradientenverfahren: Gegeben seien aktuelle Preise von Call-Optionen $C_i^*$ zu Zeiten $T_i$ mit strike $K_i$. Ziel ist es, einen Parameter $\theta^*$ so zu wählen, dass die quadratischen Fehler minimiert werden:
 \begin{gather*}
-\theta^*=\text{argmin}_{\theta} f(\theta):=\sum_{i=1}^n \frac12 (C(\theta,T_i,K_i)-C^*)^2.
+\theta^*=\text{argmin}_{\theta} r(\theta):=\sum_{i=1}^n \frac12 (C(\theta,T_i,K_i)-C^*)^2.
 \end{gather*}
-Durch eine geschlossene Formel, die in dem R-Package \glqq NMOF\grqq\footnote{Basierend auf "Numerical Methods and Optimization in Finance" von M. Gilli, D. Maringer und E. Schumann (2011), ISBN 978-0123756626} implementiert ist, kann man ein effizientes Gradientenverfahren durchführen. Es zeigte sich sogar, dass man für beliebig kleine Fehler ein geeignetes $\theta$ finden kann. Das Ergebnis hängt jedoch von der Wahl des Anfangspunktes ab, da nur lokale Minima gesucht werden. Deshalb ist es ratsam, Ergebnisse noch auf Plausibilität zu überprüfen.
+Durch eine geschlossene Formel, die in dem R-Package \glqq NMOF\grqq\footnote{Basierend auf "Numerical Methods and Optimization in Finance" von M. Gilli, D. Maringer und E. Schumann (2011), ISBN 978-0123756626} implementiert ist, kann man ein effizientes Gradientenverfahren durchführen. Es zeigte sich sogar, dass man für beliebig kleine Fehler ein geeignetes $\theta$ finden kann. Das Ergebnis hängt jedoch von der Wahl des Anfangspunktes ab, da nur lokale Minima gesucht werden. Deshalb ist es notwendig, Ergebnisse noch auf Plausibilität zu überprüfen.
 
-Als Zinssatz $\mu$ verwenden wir die Durchschnittsrendite von zehnjährigen deutschen Staatsanleihen.
-
+Als Zinssatz $\mu$ verwenden wir die Durchschnittsrendite von zehnjährigen deutschen Staatsanleihen. 
 Schließlich benötigen wir noch die Korrelationen (welche wir als konstant annehmen!) zwischen den Stocks um mit diesen unsere Kovarianzmatrix für die in den Modellen auftretenden Normalverteilungen aufzustellen.
 
 Die Parameter $\rho^1_2$ und $\rho^3_4$ sind bereits in den Parametern der entsprechenden Heston-Modelle erhalten. 
 Wegen der Identität:
-\begin{align*}
-\rho_{1,2}&=Cor(S_t,\tilde{S_t})=\\
-&=Cor(S_0+\mu S_0h+\sqrt{v_0}S_0\sqrt{h}N_1,\tilde{S_0}+\mu \tilde{S_0}h+\sqrt{v_0}\tilde{S_0}\sqrt{h}N_2)= \\
-&=Cor(\sqrt{v_0}S_0\sqrt{h}N_1,\sqrt{v_0}\tilde{S_0}\sqrt{h}N_2)=Cor(N_1,N_2)
-\end{align*}
+\begin{gather*}
+Cor(S^{KO}_t,S^{PEP}_t)= \\
+Cor\left(S^{KO}_0+\mu S^{KO}_0h+\sqrt{v^{KO}_0}S^{KO}_0\sqrt{h}N_1,S^{PEP}_0+\mu S^{PEP}_0h+\sqrt{vS^{PEP}_0}S^{PEP}_0\sqrt{h}N_2\right)= \\
+Cor\left(\sqrt{v^{KO}_0}S^{KO}_0\sqrt{h}N_1,\sqrt{v^{PEP}_0}S^{PEP}_0\sqrt{h}N_2\right)=Cor(N_1,N_2)=\rho^1_3
+\end{gather*}
 können wir die Korrelationsparameter aus historischen Daten berechnen.
 
 Für den historischen Verlauf der Volatilitäten wurde folgender Schätzer verwendet:
 \begin{equation*}
-v_i=Var(ln(\frac{S_{k+1}}{S_k}))_{k\in\left[i-t,i\right)}
+v_i=Var\left(ln\left(\frac{S_{k+1}}{S_k}\right)\right)_{k\in\left[i-t,i\right)}
 \end{equation*}
-Die gefragten Parameter ergeben sich dann aus der Stichprobenkrrelation unserer historischen Daten.\\
+Die gefragten Parameter ergeben sich dann aus der Stichprobenkrrelation unserer historischen Daten.
+
+Für die Bewertung der vier anderen Optionen gehen wir analog zu den ersten beiden Optionen vor, wobei sich statt einer vierdimensionalen Normalverteilung eine zehn- bzw. zwölfdimensionale ergibt.
 
 
 \pagebreak
