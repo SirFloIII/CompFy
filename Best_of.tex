@@ -119,7 +119,7 @@
 	
 	Die Heston-Parameter $\theta$ ermitteln wir mit einem Gradientenverfahren: Gegeben seien aktuelle Preise von Call-Optionen $C_i^*$ zu Zeiten $T_i$ mit Strike $K_i$. Ziel ist es, einen Parameter $\theta^*$ so zu wählen, dass die quadratischen Fehler minimiert werden:
 	\begin{gather*}
-	\theta^*=\text{argmin}_{\theta} r(\theta):=\sum_{i=1}^n \frac12 (C(\theta,T_i,K_i)-C^*)^2.
+	\theta^*=\text{argmin}_{\theta} r(\theta):=\sum_{i=1}^n \frac12 (C(\theta,T_i,K_i)-C_i^*)^2.
 	\end{gather*}
 	Durch eine geschlossene Formel, die in dem R-Package \glqq NMOF\grqq\footnote{Basierend auf "Numerical Methods and Optimization in Finance" von M. Gilli, D. Maringer und E. Schumann (2011), ISBN 978-0123756626} implementiert ist, kann man ein effizientes Gradientenverfahren durchführen. Es zeigte sich sogar, dass man für beliebig kleine Fehler ein geeignetes $\theta$ finden kann. Das Ergebnis hängt jedoch von der Wahl des Anfangspunktes ab, da nur lokale Minima gesucht werden. Deshalb ist es notwendig, Ergebnisse noch auf Plausibilität zu überprüfen.
 	
