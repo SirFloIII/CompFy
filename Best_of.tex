@@ -41,33 +41,33 @@
 	
 	\section*{Aufgabenstellung}
 	
-	Im folgenden werden Rainbow-Options betrachtet. Diese sind im Gegenzug zu konventionellen Optionen nicht notwendigerweise auf nur ein Underlying und einen Strike Preis aufgebaut.
+	Im Folgenden werden Rainbow-Optionen betrachtet. Diese sind im Gegenzug zu konventionellen Optionen nicht notwendigerweise auf nur ein Underlying und einen Strikepreis aufgebaut.
 	\newline
 	Konkret werden diese Optionen betrachtet:
 	\begin{itemize}
-		\item Abgabe einer Pepsi-Aktie für 2.3 Anteile einer Coca Cola Aktie
+		\item Abgabe einer Pepsi-Aktie für 2.3 Anteile einer Coca Cola-Aktie
 		\begin{equation*}
-		P=max((2.3*PEP-KO),0)
+		P=\max((2.3\cdot PEP-KO),0)
 		\end{equation*}	
-		\item Abgabe von 2.3 Anteile einer Coca Cola Aktie für eine Pepsi Aktie
+		\item Abgabe von 2.3 Anteile einer Coca Cola-Aktie für eine Pepsi-Aktie
 		\begin{equation*}
-		P=max((KO-2.3*PEP),0)
+		P=\max((KO-2.3\cdot PEP),0)
 		\end{equation*}	
-		\item Dem Kauf des Maximums aus einem Basket zu einem Strikepreis K
+		\item Kauf des Maximums aus einem Basket zu einem Strikepreis K
 		\begin{equation*}
 		\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
 		\end{equation*}
-		\item Dem Kauf des Minimums aus einem Basket zu einem Strikepreis K
+		\item Kauf des Minimums aus einem Basket zu einem Strikepreis K
 		
 		\begin{equation*}
 		\max(\min(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
 		\end{equation*}
-		\item Dem Kauf des Maximums aus einem Basket zum 16.5-fachen Kurs von XLK\footnote{Technology Select Sector SPDR Fund, ein Fond bestehend aus einigen IT-Firmen}
+		\item Kauf des Maximums aus einem Basket zum 16.5-fachen Kurs von XLK\footnote{Technology Select Sector SPDR Fund, ein Fond bestehend aus einigen IT-Firmen}
 		
 		\begin{equation*}
 		\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-XLK,0)
 		\end{equation*}
-		\item Dem Kauf des Minimums aus einem Basket zum 16.5-fachen Kurs von XLK
+		\item Kauf des Minimums aus einem Basket zum 16.5-fachen Kurs von XLK
 		
 		\begin{equation*}
 		\max(\min(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-XLK,0)
@@ -78,13 +78,13 @@
 	
 	Die Optionen werden jeweils zu den Expirationdates 1.2.2019, 15.2.2019 und 21.6.2019 bewertet.
 	\section*{Vorgehensweise}
-	Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren.
+	Zur Optionsbewertung verwenden wir das Heston-Modell, welches wir vermittels Euler-Maruyama-Verfahren diskretisieren und implementieren.
 	Das Heston-Modell für eine Option sieht folgendermaßen aus:
 	\begin{align*} 
 	dS_t &= \mu S_t dt + \sqrt{v_t} S_t dW^1_t \\
 	dv_t &= \kappa\cdot(\bar{v}-v_t) dt + \sigma \sqrt{v_t}dW^2_t 
 	\end{align*}
-	Die Besonderheit des Hestonmodells liegt daran, dass es eine explizite Formel für Call-Preise existiert. Den endgültigen Optionspreis erhalten wir dann mit einer Monte Carlo Simulation. Für die ersten beiden Teile der Aufgebenstellung ergibt sich folgendes Modell:
+	Die Besonderheit des Heston-Modells liegt daran, dass eine explizite Formel für Call-Preise existiert. Den endgültigen Optionspreis erhalten wir dann mit Monte-Carlo-Simulation. Für die ersten beiden Teile der Aufgabenstellung ergibt sich folgendes Modell
 	\begin{align*}
 	S^{KO}_{t+1}&=S^{KO}_{t}+\mu S^{KO}_{t}h+\sqrt{v^{KO}_t}S^{KO}_{t}\sqrt{h}N_1\\
 	v^{KO}_{t+1}&=\kappa^{KO}(\bar{v}^{KO}-v^{KO}_t)h+v^{KO}_t+\sigma^{KO}\sqrt{v^{KO}_t}\sqrt{h}N_2\\
