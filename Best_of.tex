@@ -1,0 +1,259 @@
+\documentclass[12pt]{article}
+\usepackage[T1]{fontenc}
+
+\usepackage{ dsfont }
+\usepackage{fullpage}
+\usepackage[ngerman]{babel}
+%\AtBeginDocument{\renewcommand{\chaptername}{}}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{chngcntr}
+%\counterwithout{equation}{chapter}
+\usepackage[utf8]{inputenc}
+%\usepackage{graphicx}
+%\usepackage{listings}
+%\usepackage{epstopdf}
+\usepackage{caption}
+%\usepackage{showidx}
+\usepackage{makeidx}
+\usepackage{enumerate}	
+\usepackage{ifthen}
+%\usepackage{ bbold }
+\usepackage{ textcomp }
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{hyperref}
+%opening
+\title{Projekt Computational Finance -''Taste the Rainbow''}
+\author{Hubert Hackl, Florian Bogner, Martin Vetter, Thomas Wagenhofer}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+In diesem Projekt geht es um die Bepreisung von Optionen, die von mehreren Aktien abhängen - sogenannte Rainbow-Optionen. Das Problem dabei ist einerseits die Modellbildung sowie numerische Simulation, andererseits spielen auch Korrelationen eine Rolle, denn die Aktien sind im Allgemeinen nicht unabhängig von einander. Die Idee ist nun, dass beschreibende SPDEs für die Aktien gewählt werden, deren Parameter errechnet oder geschätzt werden und die jeweiligen Lösungen mithilfe von numerischen Verfahren näherungsweise berechnet werden. Durch die Simulation von vielen Pfaden (Monte-Carlo-Methode) erwarten wir im Mittel eine hinreichend exakte Lösung.
+\end{abstract}
+
+
+\section{Aufgabenstellung}
+
+Im folgenden werden Rainbow-Options betrachtet. Diese sind im Gegenzug zu konventionellen Optionen nicht notwendigerweise auf nur ein Underlying und einen Strike Preis aufgebaut.
+\newline
+Konkret werden diese Optionen betrachtet:
+\begin{itemize}
+	\item Abgabe einer Pepsi-Aktie für 2.3 Anteile einer Coca Cola Aktie
+		\begin{equation*}
+	P=max((2.3*PEP-KO),0)
+	\end{equation*}	
+	\item Abgabe von 2.3 Anteile einer Coca Cola Aktie für eine Pepsi Aktie
+	\begin{equation*}
+	P=max((KO-2.3*PEP),0)
+	\end{equation*}	
+	\item Dem Kauf des Maximums aus einem Basket zu einem Strikepreis K
+	\begin{equation*}
+	\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
+	\end{equation*}
+	\item Dem Kauf des Minimums aus einem Basket zu einem Strikepreis K
+	
+	\begin{equation*}
+	\max(\min(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
+	\end{equation*}
+	\item Dem Kauf des Maximums aus dem Basket zum 16.5-fachen Kurs von XLK\footnote{Technology Select Sector SPDR Fund, ein Fond bestehend aus einigen IT-Firmen}
+	
+	\begin{equation*}
+	\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
+	\end{equation*}
+	\item Dem Kauf des Minimums aus dem Basket zum 16.5-fachen Kurs von XLK
+	
+	\begin{equation*}
+	\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
+	\end{equation*}
+	
+
+\end{itemize}
+Der genannte Basket besteht dabei aus folgenden Aktien: 6.5 $\cdot$ Apple, 1 $\cdot$ Alphabet Inc., 22.5 $\cdot$ Intel, 9 $\cdot$ IBM und 7.3 $\cdot$ NVIDIA.
+Die Optionen werden jeweils zu den Expirationdates 1.2.2019, 15.2.2019 und 21.6.2019 bewertet.
+\subsection*{Vorgehensweise}
+Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren. Die Besonderheit des Hestonmodells liegt daran, dass es eine explizite Formel für Call-Preise existiert. Den endgültigen Optionspreis erhalten wir dann mit einer Monte Carlo Simulation.\\
+Die Anfangsparameter Volatilität $v_0$, mittlere Volatilität $\bar{v}$, Korrelation zwischen Volatilität und Stockprice $\rho$, mean-reversion Parameter $\kappa$ und die Volatilität der Volatilität $\sigma$ ermitteln wir mit einem Gradientenverfahren. Hier geht die Existenz einer geschlossenen Formel für Call-Preise ein. Gegeben seien aktuelle Preise von Call-Optionen $C_i^*$ zu Zeiten $T_i$ mit strike $K_i$. Ziel ist es, einen Parameter $\theta^*$ so zu wählen, dass die quadratischen Fehler minimiert werden:
+\begin{gather*}
+\theta^*=\text{argmin}_{\theta} f(\theta):=\sum_{i=1}^n \frac12 (C(\theta,T_i,K_i)-C^*)^2.
+\end{gather*}
+Durch eine geschlossene Formel, die in dem R-Package \glqq NMOF\grqq\footnote{Basierend auf "Numerical Methods and Optimization in Finance" von M. Gilli, D. Maringer und E. Schumann (2011), ISBN 978-0123756626} implementiert ist, kann man ein effizientes Gradientenverfahren durchführen. Es zeigte sich, dass man für beliebig kleine Fehler ein geeignetes $\theta$ finden kann. Das Ergebnis hängt jedoch von der Wahl des Anfangspunktes ab, da nur lokale Minima gesucht werden. Deshalb ist es ratsam, Ergebnisse noch auf Plausibilität zu überprüfen.
+
+
+Als Zinssatz $\mu$ verwenden wir die Durchschnittsrendite von zehnjährigen deutschen Staatsanleihen.\\
+Schließlich benötigen wir noch die Korrelationen (welche wir als konstant annehmen!) zwischen den Stocks um mit diesen unsere Kovarianzmatrix für die in den Modellen auftretenden Normalverteilungen aufzustellen.
+Wegen der Identität:
+\begin{align*}
+\rho_{1,2}&=Cor(S_t,\tilde{S_t})=\\
+&=Cor(S_0+\mu S_0h+\sqrt{v_0}S_0\sqrt{h}N_1,\tilde{S_0}+\mu \tilde{S_0}h+\sqrt{v_0}\tilde{S_0}\sqrt{h}N_2)= \\
+&=Cor(\sqrt{v_0}S_0\sqrt{h}N_1,\sqrt{v_0}\tilde{S_0}\sqrt{h}N_2)=Cor(N_1,N_2)
+\end{align*}
+können wir die Korrelationsparameter aus historischen Daten berechnen.
+
+
+Betrachte nun die ersten beiden Optionen:
+\begin{itemize}
+	\item[i)] Abgabe einer Pepsi-Aktie(PEP) für 2.3 Anteile einer Coca Cola Aktie(KO) mit Payoff-function:
+	\begin{equation*}
+	P=max((KO-2.3*PEP),0)
+	\end{equation*}			
+	\item[ii)] Abgabe von 2.3 Anteile einer Coca Cola Aktie für eine Pepsi Aktie mit Payoff-function:
+	\begin{equation*}
+	P=max((2.3*PEP-KO),0)
+	\end{equation*}			
+\end{itemize}
+
+
+Im ersten Teil betrachten wir eine Option, die uns erlaubt, nach gegebener Zeit Anteile einer Aktie gegen Anteile einer anderen Aktie zu tauschen. Die Aktien sind Coca-Cola (KO) und Pepsi (PEP). Die Option ist einmal ''tausche einen Anteil Pepsi gegen 2,3 Anteile Coca-Cola'' und einmal umgekehrt ''tausche 2,3 Anteile Coca-Cola gegen einen Anteil Pepsi''. Entsprechend sind die Pay-Off-Funktionen
+
+\begin{align*}
+&\max(2,3\cdot KO - PEP; 0) \qquad \text{bzw.} \\
+&\max(PEP - 2,3\cdot KO; 0)
+\end{align*}
+
+Das heißt, wir erwerben das Recht, die Anteile zu tauschen, müssen aber nicht. Wenn nämlich unser Anteil mehr wert ist als der, den wir erhalten würden, lassen wir die Option verfallen. Das ist natürlich ungünstig für den Käufer, der sich ja einen Gewinn erhofft.
+
+Wir prognostizieren nun den Verlauf der beiden Aktien in der Zukunft bis zum Ausübungszeitpunkt, um zu sehen, wieviel Gewinn der Käufer im Durchschnitt zu erwarten hat. Dementsprechend bepreisen wir dann die Option zum jetzigen Zeitpunkt.
+
+
+\section{Coca-Cola gegen Pepsi}
+
+\subsection{Modell}
+
+Die zugrundeliegenden SPDEs sind für unsere Vorgehensweise It\={o}-Prozesse, wobei die Werte der Aktien immer in USD zu verstehen sind. Unsere Stocks beschreiben wir mithilfe der SPDE (normale Buchstaben beziehen sich im Folgenden immer auf Pepsi, während sich alle Zeichen mit Tilde (\~{}) auf Coca-Cola beziehen).
+
+\begin{align}\label{SPDEstock}
+dS_t = \mu S_t dt + \sqrt{v_t} S_t dW_t \\
+d\tilde{S}_t = \mu \tilde{S}_t dt + \sqrt{\tilde{v}_t} \tilde{S}_t d\tilde{W}_t
+\end{align}
+
+Dabei ist $\mu$ der risikolose Zins, der für beide Aktien derselbe ist. $v_t$ bzw. $\tilde{v}_t$ sind die Volatilitäten der beiden Aktien. In unserem Modell schränken wir uns nicht darauf ein, dass wir diese als konstant annehmen, sondern lassen hierfür Funktionen der Zeit zu. Hierdurch erwarten wir keine expliziten Lösungen mehr, aber im Gegenzug eine realistischere Modellierung des tatsächlichen Kurses. Wir schreiben außerdem zwei unterschiedliche Wiener Prozesse $W_t$ und $\tilde{W}_t$ an, um zu verdeutlichen, dass hier nicht beliebige Prozesse möglich sind, sondern dass wir davon ausgehen, dass die beiden Prozesse korreliert sind (was für die beiden Aktien eine durchaus schlüssige Annahme ist).
+
+Für die Volatilitäten $v_t$ und $\tilde{v}_t$ nehmen wir sogar stochastische Prozesse an. Diese modellieren wir nach dem Heston-Modell mit ''mean reversion''. Das heißt, wir nehmen an, es gibt einen ''Mittelwert'', um den sich die Volatilität bewegt - wobei punktuell größere Abweichungen bewirken, dass dann stärker wieder zurück geschwungen wird. Die SPDEs hierfür lauten
+
+\begin{align} \label{SPDEvol}
+dv_t = \kappa\cdot(\bar{v}-v_t) dt + \sigma \sqrt{v_t}dW_t \\
+d\tilde{v}_t = \tilde{\kappa}\cdot(\tilde{\bar{v}}-\tilde{v}_t) dt + \tilde{\sigma} \sqrt{\tilde{v}_t}d\tilde{W}_t
+\end{align}
+
+Hierin beschreiben $\kappa$ und $\tilde{\kappa}$, wie stark die Volatilität zum Mittelwert gezogen wird. $\bar{v}$, $\tilde{\bar{v}}$ sind die jeweiligen Mittelwerte. $\sigma$, $\tilde{\sigma}$ sind die Volatilitäten der Volatilitäten. Außerdem sei hier bemerkt, dass die Wiener Prozesse wieder unterschiedlich sind; sowohl zu einander, als auch zu denen aus den Gleichungen für die Stocks $S_t$ und $\tilde{S}_t$. Wir nehmen auch hier wieder an, dass die Prozesse korreliert sind. Wir haben also in Summe 4 Gleichungen mit stochastischen Prozessen, die alle untereinander korreliert sind.
+
+
+\subsubsection{Problematik}
+
+Um nun mit den Gleichungen arbeiten zu können, brauchen wir eine Vielzahl von Parametern. Das sind $\kappa, \bar{v}, \sigma, \tilde{\kappa}, \tilde{\bar{v}}, \tilde{\sigma}$. Außerdem noch die Korrelationen der Wiener Prozesse, und die Anfangswerte $S_0, \tilde{S}_0, v_0, \tilde{v}_0$ für die SPDEs. $S_0$ und $\tilde{S}_0$ sind bekannt; das sind die aktuellen Werte der Aktien.
+
+Wir betrachten die 4 korrelierten Gleichungen
+
+\begin{align} \label{SPDE}
+dS_t &= \mu S_t dt + \sqrt{v_t} S_t dW^1_t \\
+dv_t &= \kappa\cdot(\bar{v}-v_t) dt + \sigma \sqrt{v_t}dW^2_t \\
+d\tilde{S}_t &= \mu \tilde{S}_t dt + \sqrt{\tilde{v}_t} \tilde{S}_t dW^3_t \\
+d\tilde{v}_t &= \tilde{\kappa}\cdot(\tilde{\bar{v}}-\tilde{v}_t) dt + \tilde{\sigma} \sqrt{\tilde{v}_t}dW^4_t
+\end{align}
+
+Die Korrelationsmatrix für die Wiener Prozesse ist
+\begin{align} \label{korrel}
+\left(
+\begin{matrix}
+1& \rho& \rho_1& \rho_2\\
+\rho& 1& \rho_3& \rho_4\\
+\rho_1& \rho_3& 1& \tilde{\rho}\\
+\rho_2& \rho_4& \tilde{\rho}& 1
+\end{matrix}
+\right)
+\end{align}
+
+Die Matrix ist so zu lesen, dass der Eintrag in der $i$-ten Zeile und $j$-ten Spalte die Korrelation zwischen den Prozessen $W^i_t$ und $W^j_t$ beschreibt. All diese Parameter müssen ebenfalls bestimmt werden.
+
+
+\subsection{Vorgehensweise}
+
+\subsubsection{Parameter}
+
+Wir verwenden zweimal dieselbe Methode, um die Parameter $\kappa, \bar{v}, \sigma, v_0, \rho$ zu erhalten. Für jede Aktie einmal. Dazu ziehen wir das Gradientenverfahren zu Rate.
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXGRADIENTENVERFAHREN.ERKLÄRENXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+Damit bleiben noch die übrigen 4 Korrelationen $\rho_1, \rho_2, \rho_3,\rho_4$. Diese erhalten wir mittels
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXWIE.KRIEGEN.WIR.DIE?XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+\subsubsection{Numerische Betrachtung}
+
+Für die numerische Lösung der SPDEs (\ref{SPDE}) verwenden wir die Euler-Maruyama-Methode. Wir diskretisieren also die Zeit in äquidistante Abschnitte der Länge $h>0$. Für hinreichend kleine $h$ sollte das eine gute Approximation liefern. Dieses Schema liefert die rekursiven Gleichungen ($t+1$ meint einen Zeitschritt weiter als $t$, also $t+h$)
+
+\begin{align} \label{EMSPDE}
+S_{t+1} &= S_t +\mu S_t h + \sqrt{v_t} S_t \sqrt{h} N_1 \\
+v_{t+1} &= v_t +\kappa\cdot(\bar{v}-v_t) h + \sigma\sqrt{v_t}\sqrt{h} N_2\\
+\tilde{S}_{t+1} &= \tilde{S}_t +\mu \tilde{S}_t h + \sqrt{\tilde{v}_t} \tilde{S}_t \sqrt{h} N_3 \\
+\tilde{v}_{t+1} &= \tilde{v}_t +\tilde{\kappa}\cdot(\tilde{\bar{v}}-\tilde{v}_t) h + \tilde{\sigma}\sqrt{\tilde{v}_t}\sqrt{h} N_4
+\end{align}
+
+mit den korreliert-normalverteilten
+
+\begin{align*}
+\left(\begin{matrix}
+N_1\\N_2\\N_3\\N_4
+\end{matrix}\right)
+\thicksim \
+N\left(
+\left(\begin{matrix}
+0\\0\\0\\0
+\end{matrix}\right),
+\left(\begin{matrix}
+1& \rho& \rho_1& \rho_2\\
+\rho& 1& \rho_3& \rho_4\\
+\rho_1& \rho_3& 1& \tilde{\rho}\\
+\rho_2& \rho_4& \tilde{\rho}& 1
+\end{matrix}\right)
+\right).
+\end{align*}
+
+Die konkrete Umsetzung ist nun:
+\begin{enumerate}
+\item Erzeuge Zufallszahlen $N_1, N_2, N_3, N_4$ mit der gegebenen Verteilung
+\item Löse die Gleichungen der Volatilitäten rekursiv bis zum Endzeitpunkt und erhalte Vektor mit den Volatilitäten zum gegebenen Zeitpunkt
+\item Löse die Gleichungen der Stocks mithilfe der Volatilitäten
+\end{enumerate}
+
+Dies liefert \textit{eine} mögliche Realisierung der beiden Aktienkurse. Darauf wenden wir die Pay-Off-Funktion an (je nachdem, welche wir gerade betrachten). Wir speichern den eben erhaltenen Wert.
+Nun fahren wir fort entsprechend der Monte-Carlo-Methode. Wir wiederholen die Schritte $1.-3.$ hinreichend oft und speichern die jeweils erhaltenen Ergebnisse. Zum Schluss mitteln wir über alle so erhaltenen Werte. Das ergibt den erwarteten Wert der Option zum Ausübungszeitpunkt.
+
+
+\section{Technik-Giganten}
+
+Wir betrachten die Aktien der Unternehmen IBM, Intel (INTC), NVIDIA (NVDA), Alphabet Inc. (GOOG), Apple (AAPL). Mit den Optionen ''kaufe Anteile an der stärksten Firma'' oder ''kaufe Anteile an der schwächsten Firma''. Wir haben jeweils gewichtete Anteile; die Pay-Off-Funktionen sind also
+
+\begin{align*}
+\max(\max(6,6\ast AAPL;\ GOOG;\ 22,5\ast INTC;\ 9\ast IBM;\ 7,3\ast NVDA) -K;\ 0) \\
+\max(\min(6,6\ast AAPL;\ GOOG;\ 22,5\ast INTC;\ 9\ast IBM;\ 7,3\ast NVDA) -K;\ 0)
+\end{align*}
+
+Wir üben die Optionen also nur aus, wenn der Wert der teuersten (billigsten) Aktie größer ist als der Strike-Preis $K$.
+
+
+\subsection{Modell}
+
+Wie im ersten Teil modellieren wir wieder mit Gleichungen der Form (\ref{SPDEstock}):
+
+\begin{align*}
+dS^i_t &= \mu S^i_t dt + \sqrt{v^i_t} S^i_t dW^i_t  && i=1,\dots,5\\
+dv^i_t &= \kappa^i\cdot(\bar{v}^i-v^i_t) dt + \sigma^i \sqrt{v^i_t}d\tilde{W}^i_t
+\end{align*}
+
+\subsubsection{Problematik}
+
+Die Anzahl der Parameter wächst quadratisch in der Anzahl der Aktien. Das liegt an der Korrelationsmatrix. Während wir im ersten Teil 6 Korrelationen berechnen mussten, brauchen wir jetzt 45. Der Vorteil ist, dass diese Parameter nur einmalig berechnet werden müssen und nicht für jede Simulation neu.
+
+
+\subsection{Vorgehensweise}
+
+Diese ist exakt analog zu der für 2 Aktien, bis auf die Anzahl der Berechnungen.
+
+
+\end{document}
