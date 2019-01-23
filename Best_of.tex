@@ -75,7 +75,15 @@ Konkret werden diese Optionen betrachtet:
 
 Die Optionen werden jeweils zu den Expirationdates 1.2.2019, 15.2.2019 und 21.6.2019 bewertet.
 \subsection*{Vorgehensweise}
-Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren. Die Besonderheit des Hestonmodells liegt daran, dass es eine explizite Formel für Call-Preise existiert. Den endgültigen Optionspreis erhalten wir dann mit einer Monte Carlo Simulation. Für die ersten beiden Teile der Aufgebenstellung ergibt sich folgendes Modell:
+Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren.
+Das Heston-Modell für eine Option sieht folgendermaßen aus:
+
+\begin{align} \label{SPDE}
+dS_t &= \mu S_t dt + \sqrt{v_t} S_t dW^1_t \\
+dv_t &= \kappa\cdot(\bar{v}-v_t) dt + \sigma \sqrt{v_t}dW^2_t \\
+\end{align}
+
+ Die Besonderheit des Hestonmodells liegt daran, dass es eine explizite Formel für Call-Preise existiert. Den endgültigen Optionspreis erhalten wir dann mit einer Monte Carlo Simulation. Für die ersten beiden Teile der Aufgebenstellung ergibt sich folgendes Modell:
 \begin{align*}
 S^{KO}_{t+1}&=S^{KO}_{t}+\mu S^{KO}_{t}h+\sqrt{v^{KO}_t}S^{KO}_{t}\sqrt{h}N_1\\
 v^{KO}_{t+1}&=\kappa^{KO}(\bar{v}^{KO}-v^{KO}_t)h+v^{KO}_t+\sigma^{KO}\sqrt{v^{KO}_t}\sqrt{h}N_2\\
@@ -87,7 +95,31 @@ Wir benötigen also eine vierdimensionale Normalverteilung mit:
 \left({\begin{array}{c} N_1\\ N_2\\ N_3\\ N_4\end{array}}\right) \sim N\left(\left({\begin{array}{c} 0 \\ 0 \\ 0 \\ 0 \end{array}}\right),\left({\begin{array}{cccc} 1 & \rho^1_2 & \rho^1_3 & \rho^1_4\\ \rho^1_2 & 1 & \rho^2_3 & \rho^2_4 \\ \rho^1_3 & \rho^2_3 & 1 & \rho^3_4 \\ \rho^1_4 & \rho^2_4 & \rho^3_4 & 1 \end{array}}\right)\right)
 \end{equation*}
 
-Es sind nun jeweils die Heston-Modellparameter $\theta=(v_0,\bar v, \rho, \kappa, \sigma)$, der risikolose Zins $\mu$ 
+Es sind nun jeweils die Heston-Modellparameter $\theta=(v_0,\bar v, \rho, \kappa, \sigma)$, der risikolose Zins $\mu$ und die Korrelationen $\rho^i_j$ zu ermitteln.
+
+
+$\rho^{i}_j$ bezeichnet die Korrelation von $N_i$ und $N_j$.
+
+Die Parameter $\rho^1_2$ und $\rho^3_4$ sind die Korrrelationen zwischen KO-Volatilität und KO-Stockprice (bzw. PEP-Volatilität und PEP-Stockprice) und sind in den Parametern der entsprechenden Heston-Modelle erhalten. Die anderen Einträge in der Kovarianzmatrix werden mittels dem historischen Verlauf der Stockprices und Volatilitäten von PEP und KO ermittelt. 
+Für den historischen Verlauf der Volatilitäten wurde folgender Schätzer verwendet:
+\begin{equation*}
+v_i=Var(ln(\frac{S_{k+1}}{S_k}))_{k\in\left[i-t,i\right)}
+\end{equation*}
+Die gefragten Parameter ergeben sich dann aus der Stichprobenkovarianz unserer historischen Daten.\\
+
+
+
+
+
+
+
+
+
+Damit haben wir alles was wir benötigen um unsere Monte Carlo Simulation zu starten.
+Für die Bewertung der vier anderen Optionen gehen wir analog zu den ersten beiden Optionen vor, wobei sich statt einer vierdimensionalen Normalverteilung eine zehn- bzw. zwölfdimensionale ergibt.
+
+
+
 
 Die Anfangsparameter Volatilität $v_0$, mittlere Volatilität $\bar{v}$, Korrelation zwischen Volatilität und Stockprice $\rho$, mean-reversion Parameter $\kappa$ und die Volatilität der Volatilität $\sigma$ ermitteln wir mit einem Gradientenverfahren. Hier geht die Existenz einer geschlossenen Formel für Call-Preise ein. Gegeben seien aktuelle Preise von Call-Optionen $C_i^*$ zu Zeiten $T_i$ mit strike $K_i$. Ziel ist es, einen Parameter $\theta^*$ so zu wählen, dass die quadratischen Fehler minimiert werden:
 \begin{gather*}
