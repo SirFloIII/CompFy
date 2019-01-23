@@ -90,8 +90,7 @@ def Exchange(stocks, T, reverse = False):
         payoff.append(np.exp(-mü*T)*max(stocks[0].coeff * stocks[0].S[m][-1] - stocks[1].coeff * stocks[1].S[m][-1], 0))
     return np.average(payoff)
 
-
-bsp = 2
+bsp = 1
 
 if bsp == 2:
     n = 6
@@ -108,6 +107,8 @@ symbols = ["KO"]
 coeffs = [1]
 """
 
+print("\nFetching Data:")
+
 t = 25
 mü = 0.0025
 
@@ -115,7 +116,7 @@ N = 1000 #steps per simulation
 M = 1000 #num of simulations
 
 
-stocks = [stock(s, c) for s, c in zip(symbols, coeffs)]
+stocks = [stock(s, c) for s, c in tqdm(zip(symbols, coeffs))]
 """
 #stocks.reverse()
 for ka in range(100):
@@ -137,8 +138,10 @@ for ka in range(100):
                 sigma[2*j + 1, 2*i + 1] = sigma[2*i + 1, 2*j + 1]
     print(t,min(np.linalg.eigvals(sigma)))
 """
-minimierer=[1,-3]
 
+print("\nCalculating Correlation Coefficient:")
+
+minimierer=[1,-3]
 for ka in tqdm(range(5,390)):
     sigma = rohling.CorrMatrix(stocks, ka)
     #np.linalg.eigvals(sigma)
@@ -175,6 +178,8 @@ else:
 
 for T in Ts:
     
+    print("\nSimulating for T =", T)
+    
     h = T/(N-1)
     
     dW = np.sqrt(h) * np.random.multivariate_normal(np.zeros(2 * n), sigma, (M, N))
@@ -203,6 +208,8 @@ for T in Ts:
 
 
 
+print("\nPrinting Results:")
+
 if bsp == 2:
     print("\nCall on Max:")
     print("K\T ", *expdates)
@@ -220,14 +227,14 @@ if bsp == 2:
             string += "{P:9.2f}$ ".format(P = KTmin[(K,T)])
         print(string)
     
-    print("\nExchange with Max:")
+    print("\nExchange XLK for Max:")
     print(*expdates)
     string = ""
     for T in Ts:
         string += "{P:9.2f}$ ".format(P = ETmax[T])
     print(string)
     
-    print("\nExchange with Min:")
+    print("\nExchange XLK for Min:")
     print(*expdates)
     string = ""
     for T in Ts:
@@ -248,8 +255,11 @@ else:
     for T in Ts:
         string += "{P:9.2f}$ ".format(P = E2[T])
     print(string)
-    
 
+
+
+
+plt.figure(figsize = (10,8))
 h = T/(N-1)
 dW = np.sqrt(h) * np.random.multivariate_normal(np.zeros(2 * n), sigma, (M, N))
 for i in range(n):
@@ -263,7 +273,10 @@ for s in stocks:
 
 for s in stocks:
     plt.plot(s.S[0]*s.coeff)
-plt.legend(symbols)
+plt.legend([str(s.coeff) + " * " + s.symbol for s in stocks])
 
 
+for s in stocks:
+    plt.plot(s.history*s.coeff)
+plt.legend([str(s.coeff) + " * " + s.symbol for s in stocks])
 
