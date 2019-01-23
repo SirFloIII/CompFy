@@ -1,0 +1,211 @@
+\documentclass[12pt]{article}
+\usepackage[T1]{fontenc}
+
+\usepackage{ dsfont }
+\usepackage{fullpage}
+\usepackage[ngerman]{babel}
+%\AtBeginDocument{\renewcommand{\chaptername}{}}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{chngcntr}
+%\counterwithout{equation}{chapter}
+\usepackage[utf8]{inputenc}
+%\usepackage{graphicx}
+%\usepackage{listings}
+%\usepackage{epstopdf}
+\usepackage{caption}
+%\usepackage{showidx}
+\usepackage{makeidx}
+\usepackage{enumerate}	
+\usepackage{ifthen}
+%\usepackage{ bbold }
+\usepackage{ textcomp }
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{hyperref}
+%opening
+\title{Projekt Computational Finance -''Taste the Rainbow''}
+\author{Hubert Hackl, Florian Bogner, Martin Vetter, Thomas Wagenhofer}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2pt}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+In diesem Projekt geht es um die Bepreisung von Optionen, die von mehreren Aktien abhängen - sogenannte Rainbow-Optionen. Das Problem dabei ist einerseits die Modellbildung sowie numerische Simulation, andererseits spielen auch Korrelationen eine Rolle, denn die Aktien sind im Allgemeinen nicht unabhängig von einander. Die Idee ist nun, dass beschreibende SPDEs für die Aktien gewählt werden, deren Parameter errechnet oder geschätzt werden und die jeweiligen Lösungen mithilfe von numerischen Verfahren näherungsweise berechnet werden. Durch die Simulation von vielen Pfaden (Monte-Carlo-Methode) erwarten wir im Mittel eine hinreichend exakte Lösung.
+\end{abstract}
+
+
+\section*{Aufgabenstellung}
+
+Im folgenden werden Rainbow-Options betrachtet. Diese sind im Gegenzug zu konventionellen Optionen nicht notwendigerweise auf nur ein Underlying und einen Strike Preis aufgebaut.
+\newline
+Konkret werden diese Optionen betrachtet:
+\begin{itemize}
+	\item Abgabe einer Pepsi-Aktie für 2.3 Anteile einer Coca Cola Aktie
+		\begin{equation*}
+	P=max((2.3*PEP-KO),0)
+	\end{equation*}	
+	\item Abgabe von 2.3 Anteile einer Coca Cola Aktie für eine Pepsi Aktie
+	\begin{equation*}
+	P=max((KO-2.3*PEP),0)
+	\end{equation*}	
+	\item Dem Kauf des Maximums aus einem Basket zu einem Strikepreis K
+	\begin{equation*}
+	\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
+	\end{equation*}
+	\item Dem Kauf des Minimums aus einem Basket zu einem Strikepreis K
+	
+	\begin{equation*}
+	\max(\min(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-K,0)
+	\end{equation*}
+	\item Dem Kauf des Maximums aus einem Basket zum 16.5-fachen Kurs von XLK\footnote{Technology Select Sector SPDR Fund, ein Fond bestehend aus einigen IT-Firmen}
+	
+	\begin{equation*}
+	\max(\max(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-XLK,0)
+	\end{equation*}
+	\item Dem Kauf des Minimums aus einem Basket zum 16.5-fachen Kurs von XLK
+	
+	\begin{equation*}
+	\max(\min(6.4 \cdot AAPL,GOOG,22.5 \cdot INTC, 9 \cdot IBM, 7.3 \cdot NVDA)-XLK,0)
+	\end{equation*}
+	
+
+\end{itemize}
+
+Die Optionen werden jeweils zu den Expirationdates 1.2.2019, 15.2.2019 und 21.6.2019 bewertet.
+\section*{Vorgehensweise}
+Zur Optionsbewertung verwenden wir das Hestonmodell, welches wir vermittels Euler-Maruyama Verfahren diskretisieren und implementieren.
+Das Heston-Modell für eine Option sieht folgendermaßen aus:
+\begin{align*} 
+dS_t &= \mu S_t dt + \sqrt{v_t} S_t dW^1_t \\
+dv_t &= \kappa\cdot(\bar{v}-v_t) dt + \sigma \sqrt{v_t}dW^2_t 
+\end{align*}
+ Die Besonderheit des Hestonmodells liegt daran, dass es eine explizite Formel für Call-Preise existiert. Den endgültigen Optionspreis erhalten wir dann mit einer Monte Carlo Simulation. Für die ersten beiden Teile der Aufgebenstellung ergibt sich folgendes Modell:
+\begin{align*}
+S^{KO}_{t+1}&=S^{KO}_{t}+\mu S^{KO}_{t}h+\sqrt{v^{KO}_t}S^{KO}_{t}\sqrt{h}N_1\\
+v^{KO}_{t+1}&=\kappa^{KO}(\bar{v}^{KO}-v^{KO}_t)h+v^{KO}_t+\sigma^{KO}\sqrt{v^{KO}_t}\sqrt{h}N_2\\
+S^{PEP}_{t+1}&=S^{PEP}_{t}+\mu S^{PEP}_{t}h+\sqrt{v^{PEP}_t}S^{PEP}_{t}\sqrt{h}N_3\\
+v^{PEP}_{t+1}&=\kappa^{PEP}(\bar{v}^{PEP}-v^{PEP}_t)h+v^{PEP}_t+\sigma^{PEP}\sqrt{v^{PEP}_t}\sqrt{h}N_4
+\end{align*}
+Wir benötigen also eine vierdimensionale Normalverteilung mit:
+\begin{equation*}
+\left({\begin{array}{c} N_1\\ N_2\\ N_3\\ N_4\end{array}}\right) \sim N\left(\left({\begin{array}{c} 0 \\ 0 \\ 0 \\ 0 \end{array}}\right),\left({\begin{array}{cccc} 1 & \rho^1_2 & \rho^1_3 & \rho^1_4\\ \rho^1_2 & 1 & \rho^2_3 & \rho^2_4 \\ \rho^1_3 & \rho^2_3 & 1 & \rho^3_4 \\ \rho^1_4 & \rho^2_4 & \rho^3_4 & 1 \end{array}}\right)\right)
+\end{equation*}
+
+Es sind nun jeweils die Heston-Modellparameter $\theta=(v_0,\bar v, \rho, \kappa, \sigma)$, der risikolose Zins $\mu$ und die Korrelationen $\rho^i_j$ zu ermitteln. $\rho^{i}_j$ bezeichnet die Korrelation von $N_i$ und $N_j$.
+
+Um realistische Ergebnisse zu erhalten, legen wir folgende Rahmenwerte für die Parameter fest:
+
+% \usepackage{array} is required
+
+
+
+
+
+\begin{gather*}
+v_0 \in (0.05,0.95) \\
+\bar v  \in (0.05,0.95) \\
+\rho \in (-0.90,-0.10) \\
+\kappa \in (1,5) \\
+\sigma \in (0.05,0.95).
+\end{gather*}
+
+
+
+
+Die Heston-Parameter $\theta$ ermitteln wir mit einem Gradientenverfahren: Gegeben seien aktuelle Preise von Call-Optionen $C_i^*$ zu Zeiten $T_i$ mit strike $K_i$. Ziel ist es, einen Parameter $\theta^*$ so zu wählen, dass die quadratischen Fehler minimiert werden:
+\begin{gather*}
+\theta^*=\text{argmin}_{\theta} r(\theta):=\sum_{i=1}^n \frac12 (C(\theta,T_i,K_i)-C^*)^2.
+\end{gather*}
+Durch eine geschlossene Formel, die in dem R-Package \glqq NMOF\grqq\footnote{Basierend auf "Numerical Methods and Optimization in Finance" von M. Gilli, D. Maringer und E. Schumann (2011), ISBN 978-0123756626} implementiert ist, kann man ein effizientes Gradientenverfahren durchführen. Es zeigte sich sogar, dass man für beliebig kleine Fehler ein geeignetes $\theta$ finden kann. Das Ergebnis hängt jedoch von der Wahl des Anfangspunktes ab, da nur lokale Minima gesucht werden. Deshalb ist es notwendig, Ergebnisse noch auf Plausibilität zu überprüfen.
+
+Als Zinssatz $\mu$ verwenden wir die Durchschnittsrendite von zehnjährigen deutschen Staatsanleihen. 
+Schließlich benötigen wir noch die Korrelationen (welche wir als konstant annehmen!) zwischen den Stocks um mit diesen unsere Kovarianzmatrix für die in den Modellen auftretenden Normalverteilungen aufzustellen.
+
+Die Parameter $\rho^1_2$ und $\rho^3_4$ sind bereits in den Parametern der entsprechenden Heston-Modelle erhalten. 
+Wegen der Identität:
+\begin{gather*}
+Cor(S^{KO}_t,S^{PEP}_t)= \\
+Cor\left(S^{KO}_0+\mu S^{KO}_0h+\sqrt{v^{KO}_0}S^{KO}_0\sqrt{h}N_1,S^{PEP}_0+\mu S^{PEP}_0h+\sqrt{vS^{PEP}_0}S^{PEP}_0\sqrt{h}N_2\right)= \\
+Cor\left(\sqrt{v^{KO}_0}S^{KO}_0\sqrt{h}N_1,\sqrt{v^{PEP}_0}S^{PEP}_0\sqrt{h}N_2\right)=Cor(N_1,N_2)=\rho^1_3
+\end{gather*}
+können wir die Korrelationsparameter aus historischen Daten berechnen.
+
+Für den historischen Verlauf der Volatilitäten wurde folgender Schätzer verwendet:
+\begin{equation*}
+v_i=Var\left(ln\left(\frac{S_{k+1}}{S_k}\right)\right)_{k\in\left[i-t,i\right)}
+\end{equation*}
+Die gefragten Parameter ergeben sich dann aus der Stichprobenkrrelation unserer historischen Daten.
+
+Für die Bewertung der vier anderen Optionen gehen wir analog zu den ersten beiden Optionen vor, wobei sich statt einer vierdimensionalen Normalverteilung eine zehn- bzw. zwölfdimensionale ergibt.
+
+
+
+\section*{Simulation}
+
+Damit haben wir alles was wir benötigen um unsere Monte Carlo Simulation zu starten.
+Für die Bewertung der vier anderen Optionen gehen wir analog zu den ersten beiden Optionen vor, wobei sich statt einer vierdimensionalen Normalverteilung eine zehn- bzw. zwölfdimensionale ergibt.
+
+
+
+	Schlussendlich ergibt unsere Optionsbewertung folgende Ergebnisse:
+\subsection*{Coca-Cola/Pepsi Optionen}
+
+\begin{verbatim}
+Exchange PEP for 2.3*KO:
+2019-02-01 2019-02-15 2019-06-21
+4.57$      6.99$     17.94$ 
+
+Exchange 2.3*KO for PEP:
+2019-02-01 2019-02-15 2019-06-21
+4.73$      7.02$     15.89$
+\end{verbatim}
+
+
+\subsection*{Basket Optionen}
+
+
+
+\begin{verbatim}
+Call on Max(Basket):
+K\T  2019-02-01 2019-02-15 2019-06-21
+1050    100.59$    142.39$    333.03$ 
+1060     90.94$    133.08$    324.20$ 
+1072     79.76$    122.19$    313.76$ 
+1120     42.67$     84.02$    273.82$ 
+
+Call on Min(Basket):
+K\T  2019-02-01 2019-02-15 2019-06-21
+1050      1.60$      2.91$      8.71$ 
+1060      0.89$      1.99$      7.56$ 
+1072      0.37$      1.20$      6.34$ 
+1120      0.00$      0.10$      2.79$ 
+
+Exchange 16.5*XLK for Max(Basket):
+2019-02-01 2019-02-15 2019-06-21
+109.05$    172.37$    377.73$ 
+
+Exchange 16.5*XLK for Min(Basket):
+2019-02-01 2019-02-15 2019-06-21
+11.03$     23.03$     40.62$ 
+\end{verbatim}
+\subsection*{Anhang zur Visualisierung}
+Simulationen:
+\\
+\includegraphics[width=0.5\textwidth]{Teil1_1}	
+\includegraphics[width=0.5\textwidth]{Teil2_1}
+\includegraphics[width=0.5\textwidth]{Teil1_2}	
+\includegraphics[width=0.5\textwidth]{Teil2_2}
+\\
+Historische Aktienkurse:
+\\
+\includegraphics[width=0.5\textwidth]{Teil1_hist_2y}	
+\includegraphics[width=0.5\textwidth]{Teil2_hist_2y}	
+
+
+
+\end{document}
